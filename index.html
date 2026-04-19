@@ -98,18 +98,52 @@
   <!-- ══════════════════════════════════
        COUNTDOWN / NOTIFY
   ══════════════════════════════════ -->
-  <section style="background:var(--black); padding:3rem 0; border-bottom:1px solid rgba(201,168,76,0.1);">
-    <div class="container" style="text-align:center;">
-      <div class="countdown-label">⏱ Next Trading Session Starts In</div>
-      <div id="pbf-countdown">
-        <div class="cd-block"><span class="cd-h">00</span><span class="cd-unit">hrs</span></div>
-        <span class="cd-sep">:</span>
-        <div class="cd-block"><span class="cd-m">00</span><span class="cd-unit">min</span></div>
-        <span class="cd-sep">:</span>
-        <div class="cd-block"><span class="cd-s">00</span><span class="cd-unit">sec</span></div>
+  <section class="countdown-section">
+    <div class="cd-bg-glow"></div>
+    <div class="container cd-container">
+      <div class="cd-top-tag">
+        <span class="cd-dot"></span>
+        NEXT LIVE TRADING SESSION
       </div>
-      <p style="margin-top:1.25rem; font-size:0.9rem;">Mon–Fri · 9:45 AM ET · NQ Mini Futures · Free to Watch</p>
-      <button id="notify-live-btn" class="btn btn-outline" style="margin-top:1.25rem;">
+      <h2 class="cd-heading">Trading Room Opens In</h2>
+      <div id="pbf-countdown">
+        <div class="cd-block">
+          <div class="cd-inner">
+            <span class="cd-h">00</span>
+          </div>
+          <span class="cd-unit">Hours</span>
+        </div>
+        <div class="cd-colon">
+          <span>:</span>
+          <span>:</span>
+        </div>
+        <div class="cd-block">
+          <div class="cd-inner">
+            <span class="cd-m">00</span>
+          </div>
+          <span class="cd-unit">Minutes</span>
+        </div>
+        <div class="cd-colon">
+          <span>:</span>
+          <span>:</span>
+        </div>
+        <div class="cd-block">
+          <div class="cd-inner">
+            <span class="cd-s">00</span>
+          </div>
+          <span class="cd-unit">Seconds</span>
+        </div>
+      </div>
+      <div class="cd-meta">
+        <span>📅 Mon – Fri</span>
+        <span class="cd-meta-dot">·</span>
+        <span>⏰ 9:45 AM ET</span>
+        <span class="cd-meta-dot">·</span>
+        <span>📈 NQ Mini Futures</span>
+        <span class="cd-meta-dot">·</span>
+        <span>🎙 Mr. Bullionaire</span>
+      </div>
+      <button id="notify-live-btn" class="btn btn-gold cd-notify-btn">
         🔔 Notify Me When We Go Live
       </button>
     </div>
