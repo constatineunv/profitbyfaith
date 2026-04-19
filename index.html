@@ -20,6 +20,11 @@
 </head>
 <body>
 
+  <!-- ══ LIVE ALERT BAR (hidden until live) ══ -->
+  <div id="pbf-live-bar">
+    <span class="lbar-text">🔴 MR. BULLIONAIRE IS LIVE NOW — JOIN THE TRADING ROOM</span>
+  </div>
+
   <!-- ══════════════════════════════════
        NAV
   ══════════════════════════════════ -->
@@ -87,6 +92,26 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
         <path d="M12 5v14M5 12l7 7 7-7"/>
       </svg>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════
+       COUNTDOWN / NOTIFY
+  ══════════════════════════════════ -->
+  <section style="background:var(--black); padding:3rem 0; border-bottom:1px solid rgba(201,168,76,0.1);">
+    <div class="container" style="text-align:center;">
+      <div class="countdown-label">⏱ Next Trading Session Starts In</div>
+      <div id="pbf-countdown">
+        <div class="cd-block"><span class="cd-h">00</span><span class="cd-unit">hrs</span></div>
+        <span class="cd-sep">:</span>
+        <div class="cd-block"><span class="cd-m">00</span><span class="cd-unit">min</span></div>
+        <span class="cd-sep">:</span>
+        <div class="cd-block"><span class="cd-s">00</span><span class="cd-unit">sec</span></div>
+      </div>
+      <p style="margin-top:1.25rem; font-size:0.9rem;">Mon–Fri · 9:45 AM ET · NQ Mini Futures · Free to Watch</p>
+      <button id="notify-live-btn" class="btn btn-outline" style="margin-top:1.25rem;">
+        🔔 Notify Me When We Go Live
+      </button>
     </div>
   </section>
 
@@ -625,5 +650,6 @@
     });
   </script>
 
+  <script src="trading-room.js"></script>
 </body>
 </html>
