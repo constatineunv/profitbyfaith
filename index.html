@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="styles.css?v=2" />
   <meta property="og:type" content="website" />
   <meta property="og:title" content="Profit by Faith | Live NQ Futures Trading" />
   <meta property="og:description" content="Pray Together. Trade with Purpose. Grow Together. Live NQ Mini Futures daily 9:45–10:45 AM ET." />
@@ -98,54 +98,62 @@
   <!-- ══════════════════════════════════
        COUNTDOWN / NOTIFY
   ══════════════════════════════════ -->
-  <section class="countdown-section">
-    <div class="cd-bg-glow"></div>
-    <div class="container cd-container">
-      <div class="cd-top-tag">
-        <span class="cd-dot"></span>
+  <section style="position:relative; background:linear-gradient(180deg,#040609 0%,#0a1220 50%,#040609 100%); padding:5rem 0; overflow:hidden; border-top:1px solid rgba(201,168,76,0.1); border-bottom:1px solid rgba(201,168,76,0.1);">
+    <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:700px;height:350px;background:radial-gradient(ellipse,rgba(201,168,76,0.09) 0%,transparent 70%);pointer-events:none;"></div>
+    <div style="max-width:1200px;margin:0 auto;padding:0 1.5rem;text-align:center;position:relative;z-index:1;">
+
+      <div style="display:inline-flex;align-items:center;gap:0.6rem;font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:#c9a84c;margin-bottom:1rem;">
+        <span style="width:8px;height:8px;border-radius:50%;background:#c9a84c;display:inline-block;animation:pulse-gold 2s infinite;"></span>
         NEXT LIVE TRADING SESSION
       </div>
-      <h2 class="cd-heading">Trading Room Opens In</h2>
-      <div id="pbf-countdown">
-        <div class="cd-block">
-          <div class="cd-inner">
-            <span class="cd-h">00</span>
-          </div>
-          <span class="cd-unit">Hours</span>
-        </div>
-        <div class="cd-colon">
-          <span>:</span>
-          <span>:</span>
-        </div>
-        <div class="cd-block">
-          <div class="cd-inner">
-            <span class="cd-m">00</span>
-          </div>
-          <span class="cd-unit">Minutes</span>
-        </div>
-        <div class="cd-colon">
-          <span>:</span>
-          <span>:</span>
-        </div>
-        <div class="cd-block">
-          <div class="cd-inner">
-            <span class="cd-s">00</span>
-          </div>
-          <span class="cd-unit">Seconds</span>
-        </div>
+
+      <div style="font-size:clamp(1.4rem,3.5vw,2.2rem);color:#fff;margin-bottom:2.5rem;font-weight:300;letter-spacing:0.04em;">
+        Trading Room Opens In
       </div>
-      <div class="cd-meta">
+
+      <div id="pbf-countdown" style="display:flex;align-items:center;justify-content:center;gap:1.25rem;flex-wrap:wrap;margin-bottom:2.5rem;">
+
+        <div style="display:flex;flex-direction:column;align-items:center;gap:0.75rem;">
+          <div style="background:linear-gradient(145deg,#0d1526,#141f38);border:1px solid rgba(201,168,76,0.3);border-radius:16px;width:130px;height:130px;display:flex;align-items:center;justify-content:center;box-shadow:0 0 40px rgba(201,168,76,0.1),inset 0 1px 0 rgba(255,255,255,0.05);">
+            <span class="cd-h" style="font-family:'Bebas Neue',sans-serif;font-size:5rem;color:#c9a84c;line-height:1;text-shadow:0 0 30px rgba(201,168,76,0.6);">00</span>
+          </div>
+          <span style="font-size:0.7rem;color:#8899bb;letter-spacing:0.15em;text-transform:uppercase;">Hours</span>
+        </div>
+
+        <span class="cd-colon" style="font-family:'Bebas Neue',sans-serif;font-size:3.5rem;color:#8a6f2e;margin-bottom:1.8rem;animation:colon-blink 1s step-end infinite;">:</span>
+
+        <div style="display:flex;flex-direction:column;align-items:center;gap:0.75rem;">
+          <div style="background:linear-gradient(145deg,#0d1526,#141f38);border:1px solid rgba(201,168,76,0.3);border-radius:16px;width:130px;height:130px;display:flex;align-items:center;justify-content:center;box-shadow:0 0 40px rgba(201,168,76,0.1),inset 0 1px 0 rgba(255,255,255,0.05);">
+            <span class="cd-m" style="font-family:'Bebas Neue',sans-serif;font-size:5rem;color:#c9a84c;line-height:1;text-shadow:0 0 30px rgba(201,168,76,0.6);">00</span>
+          </div>
+          <span style="font-size:0.7rem;color:#8899bb;letter-spacing:0.15em;text-transform:uppercase;">Minutes</span>
+        </div>
+
+        <span class="cd-colon" style="font-family:'Bebas Neue',sans-serif;font-size:3.5rem;color:#8a6f2e;margin-bottom:1.8rem;animation:colon-blink 1s step-end infinite;">:</span>
+
+        <div style="display:flex;flex-direction:column;align-items:center;gap:0.75rem;">
+          <div style="background:linear-gradient(145deg,#0d1526,#141f38);border:1px solid rgba(201,168,76,0.3);border-radius:16px;width:130px;height:130px;display:flex;align-items:center;justify-content:center;box-shadow:0 0 40px rgba(201,168,76,0.1),inset 0 1px 0 rgba(255,255,255,0.05);">
+            <span class="cd-s" style="font-family:'Bebas Neue',sans-serif;font-size:5rem;color:#c9a84c;line-height:1;text-shadow:0 0 30px rgba(201,168,76,0.6);">00</span>
+          </div>
+          <span style="font-size:0.7rem;color:#8899bb;letter-spacing:0.15em;text-transform:uppercase;">Seconds</span>
+        </div>
+
+      </div>
+
+      <div style="display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:0.75rem;font-size:0.9rem;color:#8899bb;margin-bottom:2rem;">
         <span>📅 Mon – Fri</span>
-        <span class="cd-meta-dot">·</span>
+        <span style="color:rgba(201,168,76,0.3);">·</span>
         <span>⏰ 9:45 AM ET</span>
-        <span class="cd-meta-dot">·</span>
+        <span style="color:rgba(201,168,76,0.3);">·</span>
         <span>📈 NQ Mini Futures</span>
-        <span class="cd-meta-dot">·</span>
+        <span style="color:rgba(201,168,76,0.3);">·</span>
         <span>🎙 Mr. Bullionaire</span>
       </div>
-      <button id="notify-live-btn" class="btn btn-gold cd-notify-btn">
+
+      <button id="notify-live-btn" class="btn btn-gold" style="font-size:1rem;padding:1rem 2.5rem;box-shadow:0 8px 30px rgba(201,168,76,0.25);">
         🔔 Notify Me When We Go Live
       </button>
+
     </div>
   </section>
 
