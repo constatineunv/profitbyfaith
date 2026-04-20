@@ -867,8 +867,41 @@ footer {
   .about-grid, .training-grid { grid-template-columns: 1fr; }
   .about-image { display: none; }
   .discord-card { flex-direction: column; text-align: center; }
-  .nav-links { display: none; }
-  .hamburger { display: flex; }
+
+  /* Mobile nav — hide hamburger and Watch Live button, keep logo + live badge only */
+  .nav-links { display: none !important; }
+  .hamburger { display: none !important; }
+  .nav-cta { display: none !important; }
+
+  /* Ensure hero live badge doesn't overflow */
+  .hero-live-badge {
+    top: 1rem;
+    right: 1rem;
+    font-size: 0.65rem;
+    padding: 0.3rem 0.6rem;
+    max-width: 60vw;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Full width content on mobile */
+  .container { padding: 0 1rem; }
+  .section { padding: 3.5rem 0; }
+
+  /* Hero full width */
+  .hero-content { padding: 0 1rem; }
+  .hero h1 { font-size: clamp(2.2rem, 9vw, 3.5rem); }
+  .hero-logo { width: 90px; margin-bottom: 1.25rem; }
+
+  /* Countdown blocks smaller on mobile */
+  .cd-inner { width: 80px !important; height: 80px !important; border-radius: 10px !important; }
+  .cd-inner span { font-size: 3.2rem !important; }
+  #pbf-countdown { gap: 0.5rem !important; }
+  .cd-colon { font-size: 2rem !important; margin-bottom: 1.4rem !important; }
+
+  /* PiP smaller on mobile */
+  #pbf-pip { width: 260px; bottom: 1rem; right: 1rem; }
 }
 @media (max-width: 480px) {
   .signup-form { flex-direction: column; }
