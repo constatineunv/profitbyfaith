@@ -6,7 +6,7 @@ const PBF = {
   CHANNEL_ID:  'UCCRTRjVQmrCqBcrM8VED-wg',
   API_KEY:     'AIzaSyDDqwBt8I8Fl_0Dyah9jKe9t4kawF_9Cf8',
   YT_HANDLE:   '@bullionaireDT',
-  CHECK_INTERVAL: 60000, // check every 60 seconds
+  CHECK_INTERVAL: 300000, // check every 5 minutes (saves quota)
   liveVideoId: null,
   liveTimer:   null,
   pipActive:   false,
@@ -60,6 +60,9 @@ function formatCountdown(ms) {
 
 /* ── Check YouTube for active live stream via server-side proxy ── */
 async function checkLiveStatus() {
+  // Only check during trading hours to conserve API quota
+  if (!isTradingHours()) return;
+
   try {
     const res  = await fetch('/api/live');
     const data = await res.json();
