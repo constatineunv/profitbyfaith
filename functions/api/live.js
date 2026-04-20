@@ -8,11 +8,18 @@ export async function onRequest(context) {
     const res  = await fetch(url);
     const data = await res.json();
 
-    const live = data.items && data.items.length > 0;
+    // If YouTube returned an error, expose it for debugging
+    if (data.error) {
+      return new Response(JSON.stringify({ live: false, ytError: data.error.message, ytCode: data.error.code }), {
+        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*', 'Cache-Control': 'no-store' },
+      });
+    }
+
+    const live    = !!(data.items && data.items.length > 0);
     const videoId = live ? data.items[0].id.videoId : null;
     const title   = live ? data.items[0].snippet.title : null;
 
-    return new Response(JSON.stringify({ live, videoId, title }), {
+    return new Response(JSON.stringify({ live, videoId, title, itemCount: data.items ? data.items.length : 0 }), {
       headers: {
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*',
