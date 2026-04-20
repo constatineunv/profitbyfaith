@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Trade Journal | Profit by Faith</title>
+  <meta name="description" content="Daily trade journal — every green day, every red day. Full transparency from Mr. Bullionaire." />
+  <meta name="theme-color" content="#070a0f" />
+  <link rel="icon" type="image/jpeg" href="/assets/PBF-LOGO-MAIN.jpg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="journal.css" />
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav class="nav">
+    <div class="nav-inner">
+      <a href="/" class="nav-logo">
+        <img src="/assets/PBF-LOGO-MAIN.jpg" alt="PBF" />
+        <span>Profit by Faith</span>
+      </a>
+      <div class="nav-right">
+        <a href="/" class="nav-link">← Back to Site</a>
+        <a href="https://www.youtube.com/@bullionaireDT" target="_blank" rel="noopener" class="btn-gold">▶ Watch Live</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- PAGE HEADER -->
+  <header class="page-header">
+    <div class="tag">Full Transparency</div>
+    <h1>Trade Journal</h1>
+    <p>Every session. Every trade. Green days and red days — all of it.</p>
+  </header>
+
+  <!-- MONTH STATS BAR -->
+  <div class="stats-bar" id="stats-bar">
+    <div class="stat-item">
+      <span class="stat-val" id="s-pnl">—</span>
+      <span class="stat-lbl">Month P&L</span>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat-item">
+      <span class="stat-val green" id="s-green">—</span>
+      <span class="stat-lbl">Green Days</span>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat-item">
+      <span class="stat-val red" id="s-red">—</span>
+      <span class="stat-lbl">Red Days</span>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat-item">
+      <span class="stat-val gold" id="s-rate">—%</span>
+      <span class="stat-lbl">Win Rate</span>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat-item">
+      <span class="stat-val" id="s-trades">—</span>
+      <span class="stat-lbl">Total Trades</span>
+    </div>
+  </div>
+
+  <!-- CALENDAR -->
+  <div class="cal-wrap">
+    <div class="cal-nav">
+      <button class="cal-arrow" id="btn-prev">&#8592;</button>
+      <h2 class="cal-month-title" id="cal-month">Loading…</h2>
+      <button class="cal-arrow" id="btn-next">&#8594;</button>
+    </div>
+
+    <div class="cal-grid-header">
+      <span>Sun</span><span>Mon</span><span>Tue</span>
+      <span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
+    </div>
+    <div class="cal-grid" id="cal-grid">
+      <div class="cal-loading">Loading trade data…</div>
+    </div>
+  </div>
+
+  <!-- DAY DETAIL PANEL -->
+  <div class="day-panel" id="day-panel">
+    <div class="day-panel-inner">
+      <div class="day-panel-header">
+        <div>
+          <h3 id="dp-date">—</h3>
+          <span class="dp-pnl" id="dp-pnl">—</span>
+        </div>
+        <button class="dp-close" id="dp-close">✕</button>
+      </div>
+
+      <div class="dp-note-wrap">
+        <label class="dp-note-label">Session Notes</label>
+        <textarea class="dp-note" id="dp-note" placeholder="Add your notes for this session…" rows="3"></textarea>
+        <button class="dp-save-note" id="dp-save-note">Save Note</button>
+      </div>
+
+      <div class="dp-trades-header">
+        <span>Trades</span>
+        <span id="dp-count">—</span>
+      </div>
+      <div class="dp-trade-list" id="dp-trade-list"></div>
+    </div>
+  </div>
+  <div class="day-panel-overlay" id="dp-overlay"></div>
+
+  <footer class="footer">
+    <p>Profit by Faith · <a href="https://profitbyfaith.com">profitbyfaith.com</a></p>
+    <p class="verse">"Commit your works to the LORD and your plans will be established." — Proverbs 16:3</p>
+  </footer>
+
+  <script src="journal.js"></script>
+</body>
+</html>
