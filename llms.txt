@@ -1,0 +1,26 @@
+# Profit by Faith
+
+> Faith-based live day trading community. NQ Mini Futures trading, live daily 9:45–10:45 AM ET, Monday–Friday.
+
+## About
+
+Profit by Faith is led by Mr. Bullionaire — a faith-driven NQ Futures day trader who streams live sessions daily on YouTube (@bullionaireDT). The mission is to build a transparent, honest trading community where wins AND losses are shared openly. No gimmicks, no pressure, no fake results.
+
+## Pages
+
+- [Home](https://profitbyfaith.com/): Hero, about, strategies, transparency dashboard, prop firms, YouTube embeds, community, training, email signup
+- [Trade Journal](https://profitbyfaith.com/trades/): Daily trade calendar showing green/red sessions, per-day P&L, trade log, and session notes
+
+## Trading Strategies
+
+- **15-Minute Opening Range Breakout (15 ORB)**: Captures the first 15-minute range and trades the breakout long or short with defined risk
+- **Volume Profile Trading**: Uses Point of Control (POC), Value Area High/Low, and Low/High Volume Nodes for high-probability entries
+
+## Prop Firms
+
+Active accounts on Apex, Bulenox, and Take Profit Trader — all traded live on air.
+
+## Community
+
+- YouTube: https://youtube.com/@bullionaireDT
+- Live sessions: Monday–Friday, 9:45–10:45 AM ET
