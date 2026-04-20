@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=2" />
+  <link rel="stylesheet" href="styles.css?v=3" />
   <meta property="og:type" content="website" />
   <meta property="og:title" content="Profit by Faith | Live NQ Futures Trading" />
   <meta property="og:description" content="Pray Together. Trade with Purpose. Grow Together. Live NQ Mini Futures daily 9:45–10:45 AM ET." />
@@ -338,27 +338,45 @@
 
       <div class="transparency-grid">
         <div class="perf-card win">
-          <div class="perf-num green">—</div>
+          <div class="perf-num green" id="stat-wins">—</div>
           <div class="perf-label">Total Wins</div>
         </div>
         <div class="perf-card loss">
-          <div class="perf-num red">—</div>
+          <div class="perf-num red" id="stat-losses">—</div>
           <div class="perf-label">Total Losses</div>
         </div>
         <div class="perf-card">
-          <div class="perf-num gold">—%</div>
+          <div class="perf-num gold" id="stat-winrate">—%</div>
           <div class="perf-label">Win Rate</div>
         </div>
         <div class="perf-card">
-          <div class="perf-num gold">—</div>
-          <div class="perf-label">Accounts Active</div>
+          <div class="perf-num" id="stat-pnl">—</div>
+          <div class="perf-label">Net P&amp;L</div>
         </div>
       </div>
 
-      <div class="coming-soon-box">
-        <h3>📊 Live Performance Dashboard — Coming Soon</h3>
-        <p>Real-time trade log, P&amp;L tracker, and strategy breakdown will live here. No cherry-picking. Every trade, every day.</p>
-        <a href="#signup" class="btn btn-ghost" style="margin-top:1.5rem;">Get Notified at Launch</a>
+      <div class="trade-log">
+        <div class="trade-log-header">
+          <h3>Recent Trades</h3>
+          <span class="trade-log-note" id="trade-log-note">Last 20 · Updated every 5 min</span>
+        </div>
+        <div class="trade-table-wrap">
+          <table class="trade-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Instrument</th>
+                <th>Dir</th>
+                <th>Entry</th>
+                <th>Exit</th>
+                <th>P&amp;L</th>
+              </tr>
+            </thead>
+            <tbody id="trade-tbody">
+              <tr><td colspan="6" class="trade-loading">Loading trade data…</td></tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </section>
@@ -692,6 +710,6 @@
     });
   </script>
 
-  <script src="trading-room.js?v=3"></script>
+  <script src="trading-room.js?v=4"></script>
 </body>
 </html>

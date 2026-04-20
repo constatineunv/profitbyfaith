@@ -237,10 +237,75 @@ function setupNotifyBtn() {
   });
 }
 
+/* ── Trade Dashboard ── */
+async function loadTradeData() {
+  try {
+    const res  = await fetch('/api/trades');
+    const data = await res.json();
+
+    if (data.error && !data.stats) {
+      document.getElementById('trade-tbody').innerHTML =
+        `<tr><td colspan="6" class="trade-loading">${data.error}</td></tr>`;
+      return;
+    }
+
+    if (data.stats) {
+      const s = data.stats;
+      setText('stat-wins',    s.wins);
+      setText('stat-losses',  s.losses);
+      setText('stat-winrate', s.winRate + '%');
+
+      const pnlEl = document.getElementById('stat-pnl');
+      if (pnlEl) {
+        const val = parseFloat(s.totalPnl);
+        pnlEl.textContent = (val >= 0 ? '+$' : '-$') + Math.abs(val).toLocaleString('en-US', { minimumFractionDigits: 2 });
+        pnlEl.className = 'perf-num ' + (val >= 0 ? 'green' : 'red');
+      }
+    }
+
+    if (data.trades && data.trades.length > 0) {
+      const rows = data.trades.map(t => {
+        const date = t.entryTime ? t.entryTime.split(' ')[0] : '—';
+        const dir  = t.direction || '—';
+        const pnl  = parseFloat(t.profit);
+        const pnlStr = (pnl >= 0 ? '+$' : '-$') + Math.abs(pnl).toLocaleString('en-US', { minimumFractionDigits: 2 });
+        const pnlClass = pnl >= 0 ? 'trade-win' : 'trade-loss';
+        const dirClass = dir.toLowerCase() === 'long' ? 'dir-long' : 'dir-short';
+        return `<tr>
+          <td>${date}</td>
+          <td>${t.instrument || '—'}</td>
+          <td class="${dirClass}">${dir}</td>
+          <td>${t.entryPrice || '—'}</td>
+          <td>${t.exitPrice  || '—'}</td>
+          <td class="${pnlClass}">${pnlStr}</td>
+        </tr>`;
+      }).join('');
+      document.getElementById('trade-tbody').innerHTML = rows;
+    } else {
+      document.getElementById('trade-tbody').innerHTML =
+        '<tr><td colspan="6" class="trade-loading">No trades yet — check back after a session.</td></tr>';
+    }
+
+    const note = document.getElementById('trade-log-note');
+    if (note && data.stats) note.textContent = `${data.stats.totalTrades} total trades · Last 20 shown`;
+
+  } catch (e) {
+    console.warn('PBF trade data failed:', e);
+    document.getElementById('trade-tbody').innerHTML =
+      '<tr><td colspan="6" class="trade-loading">Could not load trade data.</td></tr>';
+  }
+}
+
+function setText(id, val) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = val;
+}
+
 /* ── Boot ── */
 document.addEventListener('DOMContentLoaded', () => {
   startCountdown();
   setupNotifyBtn();
   checkLiveStatus();
+  loadTradeData();
   PBF.liveTimer = setInterval(checkLiveStatus, PBF.CHECK_INTERVAL);
 });

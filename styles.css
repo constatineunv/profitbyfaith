@@ -860,6 +860,88 @@ footer {
 .footer-copy { font-size: 0.8rem; color: rgba(255,255,255,0.2); }
 .footer-verse { font-size: 0.85rem; color: var(--gold-dim); font-style: italic; margin-bottom: 1rem; }
 
+/* ── TRADE LOG ── */
+.trade-log {
+  margin-top: 2.5rem;
+  background: var(--navy-card);
+  border: 1px solid rgba(201,168,76,0.15);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.trade-log-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.trade-log-header h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.trade-log-note {
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.trade-table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.trade-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.trade-table thead th {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  background: rgba(0,0,0,0.2);
+  white-space: nowrap;
+}
+
+.trade-table tbody tr {
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  transition: background var(--transition);
+}
+
+.trade-table tbody tr:hover { background: rgba(255,255,255,0.03); }
+.trade-table tbody tr:last-child { border-bottom: none; }
+
+.trade-table td {
+  padding: 0.7rem 1rem;
+  white-space: nowrap;
+  color: rgba(255,255,255,0.85);
+}
+
+.trade-table td.trade-win  { color: var(--win);  font-weight: 600; }
+.trade-table td.trade-loss { color: var(--loss); font-weight: 600; }
+
+.trade-loading {
+  text-align: center;
+  padding: 2rem !important;
+  color: var(--muted);
+  font-style: italic;
+}
+
+.dir-long  { color: var(--win);  font-weight: 600; }
+.dir-short { color: var(--loss); font-weight: 600; }
+
+/* P&L stat card color states */
+#stat-pnl.green { color: var(--win); }
+#stat-pnl.red   { color: var(--loss); }
+
 /* ── RESPONSIVE ── */
 @media (max-width: 900px) {
   .mission-grid, .strategies-grid, .firms-grid, .platform-grid { grid-template-columns: 1fr; }
