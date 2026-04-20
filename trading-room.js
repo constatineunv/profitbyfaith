@@ -58,17 +58,15 @@ function formatCountdown(ms) {
   };
 }
 
-/* ── Check YouTube for active live stream ── */
+/* ── Check YouTube for active live stream via server-side proxy ── */
 async function checkLiveStatus() {
   try {
-    const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${PBF.CHANNEL_ID}&eventType=live&type=video&key=${PBF.API_KEY}`;
-    const res  = await fetch(url);
+    const res  = await fetch('/api/live');
     const data = await res.json();
 
-    if (data.items && data.items.length > 0) {
-      const video = data.items[0];
-      PBF.liveVideoId = video.id.videoId;
-      enterLiveMode(video);
+    if (data.live && data.videoId) {
+      PBF.liveVideoId = data.videoId;
+      enterLiveMode({ snippet: { title: data.title } });
     } else {
       PBF.liveVideoId = null;
       exitLiveMode();
