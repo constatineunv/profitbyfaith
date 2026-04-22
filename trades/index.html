@@ -5,179 +5,205 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Trade Journal | Profit by Faith</title>
   <meta name="description" content="Daily trade journal — every green day, every red day. Full transparency from Mr. Bullionaire." />
-  <meta name="theme-color" content="#070a0f" />
+  <meta name="theme-color" content="#0f1117" />
   <link rel="icon" type="image/jpeg" href="/assets/PBF-LOGO-MAIN.jpg" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet" />
   <link rel="canonical" href="https://profitbyfaith.com/trades/" />
-  <link rel="stylesheet" href="journal.css" />
+  <link rel="stylesheet" href="journal.css?v=3" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body>
 
-  <!-- NAV -->
-  <nav class="nav">
-    <div class="nav-inner">
-      <a href="/" class="nav-logo">
-        <img src="/assets/PBF-LOGO-MAIN.jpg" alt="PBF" />
-        <span>Profit by Faith</span>
-      </a>
-      <div class="nav-right">
-        <a href="/" class="nav-link">← Back to Site</a>
-        <a href="https://www.youtube.com/@bullionaireDT" target="_blank" rel="noopener" class="btn-gold">▶ Watch Live</a>
+<nav class="nav">
+  <div class="wrap nav-inner">
+    <a href="/" class="nav-logo">
+      <img src="/assets/PBF-LOGO-MAIN.jpg" alt="PBF" />
+      <span>Profit by Faith</span>
+    </a>
+    <div class="nav-right">
+      <a href="/" class="nav-link">← Back to Site</a>
+      <a href="https://www.youtube.com/@bullionaireDT" target="_blank" rel="noopener" class="btn-gold">▶ Watch Live</a>
+    </div>
+  </div>
+</nav>
+
+<header class="page-header">
+  <div class="tag">Full Transparency</div>
+  <h1>Trade Journal</h1>
+  <p>Every session. Every trade. Green days and red days — all of it.</p>
+</header>
+
+<!-- STAT CARDS -->
+<div class="wrap">
+  <div class="stat-cards">
+
+    <div class="stat-card">
+      <div class="sc-label">Net P&amp;L</div>
+      <div class="sc-value" id="sc-pnl">—</div>
+      <div class="sc-sub" id="sc-pnl-sub">All time</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="sc-label">Trade Win %</div>
+      <div class="sc-gauge-wrap">
+        <svg class="sc-gauge" viewBox="0 0 120 70" fill="none">
+          <path d="M10,65 A50,50 0 0,1 110,65" stroke="rgba(255,255,255,0.08)" stroke-width="10" stroke-linecap="round"/>
+          <path id="g-trade-arc" d="M10,65 A50,50 0 0,1 10,65" stroke="#2dd4bf" stroke-width="10" stroke-linecap="round"/>
+        </svg>
+        <div class="sc-gauge-val" id="sc-winrate">—%</div>
+      </div>
+      <div class="sc-sub" id="sc-winrate-sub">— W &nbsp;/&nbsp; — L</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="sc-label">Day Win %</div>
+      <div class="sc-gauge-wrap">
+        <svg class="sc-gauge" viewBox="0 0 120 70" fill="none">
+          <path d="M10,65 A50,50 0 0,1 110,65" stroke="rgba(255,255,255,0.08)" stroke-width="10" stroke-linecap="round"/>
+          <path id="g-day-arc" d="M10,65 A50,50 0 0,1 10,65" stroke="#c9a84c" stroke-width="10" stroke-linecap="round"/>
+        </svg>
+        <div class="sc-gauge-val" id="sc-dayrate">—%</div>
+      </div>
+      <div class="sc-sub" id="sc-dayrate-sub">— green &nbsp;/&nbsp; — red</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="sc-label">Avg Win / Avg Loss</div>
+      <div class="sc-value" id="sc-ratio">—</div>
+      <div class="sc-sub" id="sc-ratio-sub">Win/loss ratio</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- YEARLY CALENDAR -->
+<div class="wrap section-gap">
+  <div class="section-hdr">
+    <h2 class="section-title">Yearly Calendar</h2>
+    <div class="ytabs">
+      <button class="ytab active" data-mode="pnl">P&amp;L</button>
+      <button class="ytab" data-mode="trades">Trades</button>
+    </div>
+  </div>
+  <div class="yearly-scroll">
+    <table class="yearly-table" id="yearly-table">
+      <tbody id="yearly-body"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- STATISTICS + PERFORMANCE -->
+<div class="wrap section-gap bottom-grid">
+
+  <div class="stats-panel">
+    <h2 class="section-title">Statistics</h2>
+
+    <div class="sp-row sp-row-bar">
+      <span class="sp-label">Direction Split</span>
+      <div class="sp-bar">
+        <div class="sp-bar-long"  id="sp-bar-long"  style="width:50%"></div>
+        <div class="sp-bar-short" id="sp-bar-short" style="width:50%"></div>
+      </div>
+      <div class="sp-bar-legend">
+        <span class="leg-long"><span class="leg-dot teal"></span>Long <b id="sp-long-pct">—%</b></span>
+        <span class="leg-short"><span class="leg-dot red"></span>Short <b id="sp-short-pct">—%</b></span>
       </div>
     </div>
-  </nav>
 
-  <!-- PAGE HEADER -->
-  <header class="page-header">
-    <div class="tag">Full Transparency</div>
-    <h1>Trade Journal</h1>
-    <p>Every session. Every trade. Green days and red days — all of it.</p>
-  </header>
-
-  <!-- KPI CARDS -->
-  <section class="kpi-row" id="kpi-row">
-    <div class="kpi-card">
-      <span class="kpi-label">Net P&amp;L</span>
-      <span class="kpi-val" id="k-pnl">—</span>
-      <span class="kpi-sub" id="k-pnl-sub">All time</span>
+    <div class="sp-row">
+      <span class="sp-label">Best Day</span>
+      <span class="sp-val green" id="sp-best">—</span>
     </div>
-    <div class="kpi-card">
-      <span class="kpi-label">Day Win Rate</span>
-      <span class="kpi-val gold" id="k-winrate">—%</span>
-      <span class="kpi-sub" id="k-winrate-sub">— green / — red</span>
+    <div class="sp-row">
+      <span class="sp-label">Worst Day</span>
+      <span class="sp-val red" id="sp-worst">—</span>
     </div>
-    <div class="kpi-card">
-      <span class="kpi-label">Avg Win / Avg Loss</span>
-      <span class="kpi-val" id="k-ratio">—</span>
-      <span class="kpi-sub" id="k-ratio-sub">Win/loss ratio</span>
+    <div class="sp-row">
+      <span class="sp-label">Avg Daily P&amp;L</span>
+      <span class="sp-val" id="sp-avg">—</span>
     </div>
-    <div class="kpi-card">
-      <span class="kpi-label">Total Trades</span>
-      <span class="kpi-val" id="k-trades">—</span>
-      <span class="kpi-sub" id="k-trades-sub">— trading days</span>
+    <div class="sp-row">
+      <span class="sp-label">Total Trades</span>
+      <span class="sp-val" id="sp-total-trades">—</span>
     </div>
-  </section>
-
-  <!-- VIEW TABS + MONTH STATS -->
-  <div class="view-toolbar">
-    <div class="view-tabs">
-      <button class="view-tab active" data-view="monthly">Monthly</button>
-      <button class="view-tab" data-view="yearly">Yearly</button>
-    </div>
-    <div class="month-stats" id="month-stats">
-      <span class="ms-item"><span class="ms-val" id="ms-pnl">—</span><span class="ms-lbl">Month P&L</span></span>
-      <span class="ms-sep"></span>
-      <span class="ms-item"><span class="ms-val green" id="ms-green">—</span><span class="ms-lbl">Green</span></span>
-      <span class="ms-sep"></span>
-      <span class="ms-item"><span class="ms-val red" id="ms-red">—</span><span class="ms-lbl">Red</span></span>
-      <span class="ms-sep"></span>
-      <span class="ms-item"><span class="ms-val gold" id="ms-rate">—%</span><span class="ms-lbl">Win Rate</span></span>
+    <div class="sp-row">
+      <span class="sp-label">Avg Trades / Day</span>
+      <span class="sp-val" id="sp-avg-trades">—</span>
     </div>
   </div>
 
-  <!-- MONTHLY VIEW -->
-  <div id="view-monthly">
-    <div class="cal-wrap">
-      <div class="cal-nav">
-        <button class="cal-arrow" id="btn-prev">&#8592;</button>
-        <h2 class="cal-month-title" id="cal-month">Loading…</h2>
-        <button class="cal-arrow" id="btn-next">&#8594;</button>
-      </div>
-      <div class="cal-grid-header">
-        <span>Sun</span><span>Mon</span><span>Tue</span>
-        <span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
-      </div>
-      <div class="cal-grid" id="cal-grid">
-        <div class="cal-loading">Loading trade data…</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- YEARLY VIEW -->
-  <div id="view-yearly" class="view-hidden">
-    <div class="yearly-wrap">
-      <div class="yearly-grid" id="yearly-grid"></div>
-    </div>
-  </div>
-
-  <!-- EQUITY CURVE -->
-  <section class="equity-section">
-    <div class="section-hdr">
+  <div class="perf-panel">
+    <div class="perf-hdr">
       <div>
         <h2 class="section-title">Performance</h2>
-        <p class="section-sub">Cumulative P&amp;L over time</p>
+        <p class="section-sub">Cumulative P&amp;L</p>
       </div>
-      <span class="equity-total" id="equity-total">—</span>
+      <div class="perf-total" id="perf-total">—</div>
     </div>
-    <div class="equity-wrap">
+    <div class="chart-wrap">
       <canvas id="equity-chart"></canvas>
     </div>
-  </section>
+  </div>
 
-  <!-- BREAKDOWN -->
-  <section class="breakdown-section">
-    <div class="breakdown-inner">
-      <div class="breakdown-card">
-        <span class="bd-label">Direction Split</span>
-        <div class="bd-bar-wrap">
-          <div class="bd-bar-fill long" id="bd-long-fill" style="width:50%"></div>
-          <div class="bd-bar-fill short" id="bd-short-fill" style="width:50%"></div>
-        </div>
-        <div class="bd-bar-labels">
-          <span class="bd-long-lbl"><span class="dot teal"></span> Long <strong id="bd-long-pct">—%</strong></span>
-          <span class="bd-short-lbl"><span class="dot red"></span> Short <strong id="bd-short-pct">—%</strong></span>
-        </div>
-      </div>
-      <div class="breakdown-card">
-        <span class="bd-label">Best Day</span>
-        <span class="bd-big green" id="bd-best-val">—</span>
-        <span class="bd-date" id="bd-best-date">—</span>
-      </div>
-      <div class="breakdown-card">
-        <span class="bd-label">Worst Day</span>
-        <span class="bd-big red" id="bd-worst-val">—</span>
-        <span class="bd-date" id="bd-worst-date">—</span>
-      </div>
-      <div class="breakdown-card">
-        <span class="bd-label">Avg Daily P&amp;L</span>
-        <span class="bd-big" id="bd-avg-val">—</span>
-        <span class="bd-date">on trading days</span>
-      </div>
-    </div>
-  </section>
+</div>
 
-  <!-- DAY DETAIL PANEL -->
-  <div class="day-panel" id="day-panel">
-    <div class="day-panel-inner">
-      <div class="day-panel-header">
-        <div>
-          <h3 id="dp-date">—</h3>
-          <span class="dp-pnl" id="dp-pnl">—</span>
-        </div>
-        <button class="dp-close" id="dp-close">✕</button>
-      </div>
-      <div class="dp-note-wrap">
-        <label class="dp-note-label">Session Notes</label>
-        <textarea class="dp-note" id="dp-note" placeholder="Add your notes for this session…" rows="3"></textarea>
-        <button class="dp-save-note" id="dp-save-note">Save Note</button>
-      </div>
-      <div class="dp-trades-header">
-        <span>Trades</span>
-        <span id="dp-count">—</span>
-      </div>
-      <div class="dp-trade-list" id="dp-trade-list"></div>
+<!-- MONTHLY CALENDAR -->
+<div class="wrap section-gap">
+  <div class="section-hdr">
+    <h2 class="section-title">Monthly Detail</h2>
+    <div class="month-stats-row">
+      <span class="ms-chip"><span class="ms-val" id="ms-pnl">—</span><span class="ms-lbl">Month P&L</span></span>
+      <span class="ms-chip"><span class="ms-val green" id="ms-green">—</span><span class="ms-lbl">Green</span></span>
+      <span class="ms-chip"><span class="ms-val red" id="ms-red">—</span><span class="ms-lbl">Red</span></span>
+      <span class="ms-chip"><span class="ms-val gold" id="ms-rate">—%</span><span class="ms-lbl">Win Rate</span></span>
     </div>
   </div>
-  <div class="day-panel-overlay" id="dp-overlay"></div>
 
-  <footer class="footer">
-    <p>Profit by Faith · <a href="https://profitbyfaith.com">profitbyfaith.com</a></p>
+  <div class="cal-nav">
+    <button class="cal-arrow" id="btn-prev">&#8592;</button>
+    <h3 class="cal-month-title" id="cal-month">Loading…</h3>
+    <button class="cal-arrow" id="btn-next">&#8594;</button>
+  </div>
+  <div class="cal-grid-header">
+    <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
+  </div>
+  <div class="cal-grid" id="cal-grid">
+    <div class="cal-loading">Loading…</div>
+  </div>
+</div>
+
+<!-- DAY PANEL -->
+<div class="day-panel" id="day-panel">
+  <div class="day-panel-inner">
+    <div class="day-panel-header">
+      <div>
+        <h3 id="dp-date">—</h3>
+        <span class="dp-pnl" id="dp-pnl">—</span>
+      </div>
+      <button class="dp-close" id="dp-close">✕</button>
+    </div>
+    <div class="dp-note-wrap">
+      <label class="dp-note-label">Session Notes</label>
+      <textarea class="dp-note" id="dp-note" placeholder="Add your notes…" rows="3"></textarea>
+      <button class="dp-save-note" id="dp-save-note">Save Note</button>
+    </div>
+    <div class="dp-trades-header">
+      <span>Trades</span><span id="dp-count">—</span>
+    </div>
+    <div class="dp-trade-list" id="dp-trade-list"></div>
+  </div>
+</div>
+<div class="day-panel-overlay" id="dp-overlay"></div>
+
+<footer class="footer">
+  <div class="wrap">
+    <p>Profit by Faith &middot; <a href="https://profitbyfaith.com">profitbyfaith.com</a></p>
     <p class="verse">"Commit your works to the LORD and your plans will be established." — Proverbs 16:3</p>
-  </footer>
+  </div>
+</footer>
 
-  <script src="journal.js"></script>
+<script src="journal.js?v=3"></script>
 </body>
 </html>
