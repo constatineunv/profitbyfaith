@@ -12,12 +12,12 @@ let yearlyMode   = 'pnl';
 /* ── SVG Gauge Arc ── */
 function gaugeArcPath(pct) {
   const p = Math.min(Math.max(pct, 0), 1);
-  if (p === 0) return 'M10,65 A50,50 0 0,1 10,65';
-  const angle  = Math.PI - p * Math.PI;
-  const x      = 60 + 50 * Math.cos(angle);
-  const y      = 65 - 50 * Math.sin(angle);
-  const large  = p > 0.5 ? 1 : 0;
-  return `M10,65 A50,50 0 ${large},1 ${x.toFixed(2)},${y.toFixed(2)}`;
+  if (p < 0.001) return 'M10,65 A50,50 0 0,1 10.01,64.99';
+  if (p > 0.999) return 'M10,65 A50,50 0 0,1 109.99,65';
+  const angle = Math.PI - p * Math.PI;
+  const x     = 60 + 50 * Math.cos(angle);
+  const y     = 65 - 50 * Math.sin(angle);
+  return `M10,65 A50,50 0 0,1 ${x.toFixed(2)},${y.toFixed(2)}`;
 }
 
 /* ── Load data ── */
