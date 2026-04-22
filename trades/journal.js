@@ -34,6 +34,7 @@ async function loadJournalData() {
 
 function renderAll() {
   computeAndRenderStatCards();
+  renderGlobalCards(null, 'All Time');
   renderYearlyTable();
   renderStatsPanel();
   renderEquityCurve();
@@ -93,41 +94,60 @@ function computeStats(prefix) {
   };
 }
 
-/* ── Stat Cards + Gauges ── */
-function computeAndRenderStatCards() {
-  const now    = new Date();
-  const prefix = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-  const s      = computeStats(prefix);
-
+/* ── Shared card renderer (used by both top monthly cards and global overview) ── */
+function renderStatCards(ids, arcIds, s, sublabel) {
   const fmt = (v) => {
     const abs = '$' + Math.abs(v).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
     return (v >= 0 ? '+' : '-') + abs;
   };
 
-  const pnlEl = document.getElementById('sc-pnl');
+  const pnlEl = document.getElementById(ids.pnl);
   pnlEl.textContent = fmt(s.totalPnl);
   pnlEl.className   = 'sc-value ' + (s.totalPnl >= 0 ? 'green' : 'red');
-  const monthName = now.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-  document.getElementById('sc-pnl-sub').textContent = monthName;
+  document.getElementById(ids.pnlSub).textContent = sublabel;
 
-  // Trade win% gauge (teal)
   const twPct = Math.round(s.tradeWinPct * 100);
-  document.getElementById('sc-winrate').textContent     = twPct + '%';
-  document.getElementById('sc-winrate-sub').textContent = `${s.wins} W \u00a0/\u00a0 ${s.losses} L`;
-  document.getElementById('g-trade-arc').setAttribute('d', gaugeArcPath(s.tradeWinPct));
+  document.getElementById(ids.winrate).textContent    = twPct + '%';
+  document.getElementById(ids.winrateSub).textContent = `${s.wins} W \u00a0/\u00a0 ${s.losses} L`;
+  document.getElementById(arcIds.trade).setAttribute('d', gaugeArcPath(s.tradeWinPct));
 
-  // Day win% gauge (gold)
   const dwPct = Math.round(s.dayWinPct * 100);
-  document.getElementById('sc-dayrate').textContent     = dwPct + '%';
-  document.getElementById('sc-dayrate-sub').textContent = `${s.greenDays} green \u00a0/\u00a0 ${s.redDays} red`;
-  document.getElementById('g-day-arc').setAttribute('d', gaugeArcPath(s.dayWinPct));
+  document.getElementById(ids.dayrate).textContent    = dwPct + '%';
+  document.getElementById(ids.dayrateSub).textContent = `${s.greenDays} green \u00a0/\u00a0 ${s.redDays} red`;
+  document.getElementById(arcIds.day).setAttribute('d', gaugeArcPath(s.dayWinPct));
 
-  // Avg Win / Avg Loss
-  const ratioEl = document.getElementById('sc-ratio');
+  const ratioEl = document.getElementById(ids.ratio);
   ratioEl.textContent = s.ratio > 0 ? s.ratio.toFixed(2) + 'x' : '—';
   ratioEl.className   = 'sc-value ' + (s.ratio >= 1 ? 'green' : 'red');
-  document.getElementById('sc-ratio-sub').textContent =
-    `$${Math.round(s.avgWin).toLocaleString()} avg win`;
+  document.getElementById(ids.ratioSub).textContent = `$${Math.round(s.avgWin).toLocaleString()} avg win`;
+}
+
+/* ── Top stat cards — always the currently viewed month ── */
+function computeAndRenderStatCards() {
+  const prefix = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`;
+  const s      = computeStats(prefix);
+  const label  = new Date(currentYear, currentMonth).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  renderStatCards(
+    { pnl: 'sc-pnl', pnlSub: 'sc-pnl-sub', winrate: 'sc-winrate', winrateSub: 'sc-winrate-sub',
+      dayrate: 'sc-dayrate', dayrateSub: 'sc-dayrate-sub', ratio: 'sc-ratio', ratioSub: 'sc-ratio-sub' },
+    { trade: 'g-trade-arc', day: 'g-day-arc' },
+    s, label
+  );
+}
+
+/* ── Global overview cards — all-time by default, filterable by year/month ── */
+function renderGlobalCards(prefix, label) {
+  const s = computeStats(prefix);
+  renderStatCards(
+    { pnl: 'gs-pnl', pnlSub: 'gs-pnl-sub', winrate: 'gs-winrate', winrateSub: 'gs-winrate-sub',
+      dayrate: 'gs-dayrate', dayrateSub: 'gs-dayrate-sub', ratio: 'gs-ratio', ratioSub: 'gs-ratio-sub' },
+    { trade: 'g-trade-arc2', day: 'g-day-arc2' },
+    s, label
+  );
+  document.getElementById('gs-period').textContent = label;
+  const resetBtn = document.getElementById('gs-reset');
+  if (prefix) resetBtn.classList.add('visible');
+  else        resetBtn.classList.remove('visible');
 }
 
 /* ── Yearly Table ── */
@@ -168,6 +188,8 @@ function renderYearlyTable() {
     const yrTd = document.createElement('td');
     yrTd.className = 'yr-year-label';
     yrTd.textContent = yr;
+    yrTd.title = `Filter to ${yr}`;
+    yrTd.addEventListener('click', () => renderGlobalCards(yr, yr));
     tr.appendChild(yrTd);
 
     for (let mo = 1; mo <= 12; mo++) {
@@ -186,6 +208,8 @@ function renderYearlyTable() {
         td.innerHTML = yearlyMode === 'trades'
           ? `<span class="yr-pnl">${disp}</span><span class="yr-count">trades</span>`
           : `<span class="yr-pnl">${disp}</span><span class="yr-count">${data.count} trades</span>`;
+        const moLabel = new Date(parseInt(yr), mo - 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+        td.addEventListener('click', () => renderGlobalCards(k, moLabel));
       } else {
         td.classList.add('yr-empty');
         td.textContent = '—';
@@ -471,11 +495,17 @@ document.getElementById('btn-prev').addEventListener('click', () => {
   currentMonth--;
   if (currentMonth < 0) { currentMonth = 11; currentYear--; }
   renderCalendar();
+  computeAndRenderStatCards();
 });
 document.getElementById('btn-next').addEventListener('click', () => {
   currentMonth++;
   if (currentMonth > 11) { currentMonth = 0; currentYear++; }
   renderCalendar();
+  computeAndRenderStatCards();
+});
+
+document.getElementById('gs-reset').addEventListener('click', () => {
+  renderGlobalCards(null, 'All Time');
 });
 
 document.getElementById('dp-save-note').addEventListener('click', () => {
