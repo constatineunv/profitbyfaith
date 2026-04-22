@@ -40,9 +40,11 @@ function renderAll() {
   renderCalendar();
 }
 
-/* ── Compute all-time stats ── */
-function computeStats() {
-  const entries = Object.entries(journalData);
+/* ── Compute stats (scoped to a date prefix, or all if prefix is null) ── */
+function computeStats(prefix) {
+  const entries = prefix
+    ? Object.entries(journalData).filter(([d]) => d.startsWith(prefix))
+    : Object.entries(journalData);
   const days = entries.map(([, v]) => v);
 
   const tradingDays = days.filter(d => d.count > 0);
@@ -93,7 +95,9 @@ function computeStats() {
 
 /* ── Stat Cards + Gauges ── */
 function computeAndRenderStatCards() {
-  const s = computeStats();
+  const now    = new Date();
+  const prefix = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  const s      = computeStats(prefix);
 
   const fmt = (v) => {
     const abs = '$' + Math.abs(v).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
@@ -103,7 +107,8 @@ function computeAndRenderStatCards() {
   const pnlEl = document.getElementById('sc-pnl');
   pnlEl.textContent = fmt(s.totalPnl);
   pnlEl.className   = 'sc-value ' + (s.totalPnl >= 0 ? 'green' : 'red');
-  document.getElementById('sc-pnl-sub').textContent = 'All time';
+  const monthName = now.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  document.getElementById('sc-pnl-sub').textContent = monthName;
 
   // Trade win% gauge (teal)
   const twPct = Math.round(s.tradeWinPct * 100);
@@ -193,7 +198,7 @@ function renderYearlyTable() {
 
 /* ── Stats Panel ── */
 function renderStatsPanel() {
-  const s = computeStats();
+  const s = computeStats(null);
   const fmtAmt = (v) => {
     const abs = Math.abs(v).toLocaleString('en-US', { minimumFractionDigits: 2 });
     return (v >= 0 ? '+$' : '-$') + abs;
