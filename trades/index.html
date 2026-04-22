@@ -12,6 +12,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap" rel="stylesheet" />
   <link rel="canonical" href="https://profitbyfaith.com/trades/" />
   <link rel="stylesheet" href="journal.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body>
 
@@ -36,50 +37,117 @@
     <p>Every session. Every trade. Green days and red days — all of it.</p>
   </header>
 
-  <!-- MONTH STATS BAR -->
-  <div class="stats-bar" id="stats-bar">
-    <div class="stat-item">
-      <span class="stat-val" id="s-pnl">—</span>
-      <span class="stat-lbl">Month P&L</span>
+  <!-- KPI CARDS -->
+  <section class="kpi-row" id="kpi-row">
+    <div class="kpi-card">
+      <span class="kpi-label">Net P&amp;L</span>
+      <span class="kpi-val" id="k-pnl">—</span>
+      <span class="kpi-sub" id="k-pnl-sub">All time</span>
     </div>
-    <div class="stat-divider"></div>
-    <div class="stat-item">
-      <span class="stat-val green" id="s-green">—</span>
-      <span class="stat-lbl">Green Days</span>
+    <div class="kpi-card">
+      <span class="kpi-label">Day Win Rate</span>
+      <span class="kpi-val gold" id="k-winrate">—%</span>
+      <span class="kpi-sub" id="k-winrate-sub">— green / — red</span>
     </div>
-    <div class="stat-divider"></div>
-    <div class="stat-item">
-      <span class="stat-val red" id="s-red">—</span>
-      <span class="stat-lbl">Red Days</span>
+    <div class="kpi-card">
+      <span class="kpi-label">Avg Win / Avg Loss</span>
+      <span class="kpi-val" id="k-ratio">—</span>
+      <span class="kpi-sub" id="k-ratio-sub">Win/loss ratio</span>
     </div>
-    <div class="stat-divider"></div>
-    <div class="stat-item">
-      <span class="stat-val gold" id="s-rate">—%</span>
-      <span class="stat-lbl">Win Rate</span>
+    <div class="kpi-card">
+      <span class="kpi-label">Total Trades</span>
+      <span class="kpi-val" id="k-trades">—</span>
+      <span class="kpi-sub" id="k-trades-sub">— trading days</span>
     </div>
-    <div class="stat-divider"></div>
-    <div class="stat-item">
-      <span class="stat-val" id="s-trades">—</span>
-      <span class="stat-lbl">Total Trades</span>
+  </section>
+
+  <!-- VIEW TABS + MONTH STATS -->
+  <div class="view-toolbar">
+    <div class="view-tabs">
+      <button class="view-tab active" data-view="monthly">Monthly</button>
+      <button class="view-tab" data-view="yearly">Yearly</button>
+    </div>
+    <div class="month-stats" id="month-stats">
+      <span class="ms-item"><span class="ms-val" id="ms-pnl">—</span><span class="ms-lbl">Month P&L</span></span>
+      <span class="ms-sep"></span>
+      <span class="ms-item"><span class="ms-val green" id="ms-green">—</span><span class="ms-lbl">Green</span></span>
+      <span class="ms-sep"></span>
+      <span class="ms-item"><span class="ms-val red" id="ms-red">—</span><span class="ms-lbl">Red</span></span>
+      <span class="ms-sep"></span>
+      <span class="ms-item"><span class="ms-val gold" id="ms-rate">—%</span><span class="ms-lbl">Win Rate</span></span>
     </div>
   </div>
 
-  <!-- CALENDAR -->
-  <div class="cal-wrap">
-    <div class="cal-nav">
-      <button class="cal-arrow" id="btn-prev">&#8592;</button>
-      <h2 class="cal-month-title" id="cal-month">Loading…</h2>
-      <button class="cal-arrow" id="btn-next">&#8594;</button>
-    </div>
-
-    <div class="cal-grid-header">
-      <span>Sun</span><span>Mon</span><span>Tue</span>
-      <span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
-    </div>
-    <div class="cal-grid" id="cal-grid">
-      <div class="cal-loading">Loading trade data…</div>
+  <!-- MONTHLY VIEW -->
+  <div id="view-monthly">
+    <div class="cal-wrap">
+      <div class="cal-nav">
+        <button class="cal-arrow" id="btn-prev">&#8592;</button>
+        <h2 class="cal-month-title" id="cal-month">Loading…</h2>
+        <button class="cal-arrow" id="btn-next">&#8594;</button>
+      </div>
+      <div class="cal-grid-header">
+        <span>Sun</span><span>Mon</span><span>Tue</span>
+        <span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
+      </div>
+      <div class="cal-grid" id="cal-grid">
+        <div class="cal-loading">Loading trade data…</div>
+      </div>
     </div>
   </div>
+
+  <!-- YEARLY VIEW -->
+  <div id="view-yearly" class="view-hidden">
+    <div class="yearly-wrap">
+      <div class="yearly-grid" id="yearly-grid"></div>
+    </div>
+  </div>
+
+  <!-- EQUITY CURVE -->
+  <section class="equity-section">
+    <div class="section-hdr">
+      <div>
+        <h2 class="section-title">Performance</h2>
+        <p class="section-sub">Cumulative P&amp;L over time</p>
+      </div>
+      <span class="equity-total" id="equity-total">—</span>
+    </div>
+    <div class="equity-wrap">
+      <canvas id="equity-chart"></canvas>
+    </div>
+  </section>
+
+  <!-- BREAKDOWN -->
+  <section class="breakdown-section">
+    <div class="breakdown-inner">
+      <div class="breakdown-card">
+        <span class="bd-label">Direction Split</span>
+        <div class="bd-bar-wrap">
+          <div class="bd-bar-fill long" id="bd-long-fill" style="width:50%"></div>
+          <div class="bd-bar-fill short" id="bd-short-fill" style="width:50%"></div>
+        </div>
+        <div class="bd-bar-labels">
+          <span class="bd-long-lbl"><span class="dot teal"></span> Long <strong id="bd-long-pct">—%</strong></span>
+          <span class="bd-short-lbl"><span class="dot red"></span> Short <strong id="bd-short-pct">—%</strong></span>
+        </div>
+      </div>
+      <div class="breakdown-card">
+        <span class="bd-label">Best Day</span>
+        <span class="bd-big green" id="bd-best-val">—</span>
+        <span class="bd-date" id="bd-best-date">—</span>
+      </div>
+      <div class="breakdown-card">
+        <span class="bd-label">Worst Day</span>
+        <span class="bd-big red" id="bd-worst-val">—</span>
+        <span class="bd-date" id="bd-worst-date">—</span>
+      </div>
+      <div class="breakdown-card">
+        <span class="bd-label">Avg Daily P&amp;L</span>
+        <span class="bd-big" id="bd-avg-val">—</span>
+        <span class="bd-date">on trading days</span>
+      </div>
+    </div>
+  </section>
 
   <!-- DAY DETAIL PANEL -->
   <div class="day-panel" id="day-panel">
@@ -91,13 +159,11 @@
         </div>
         <button class="dp-close" id="dp-close">✕</button>
       </div>
-
       <div class="dp-note-wrap">
         <label class="dp-note-label">Session Notes</label>
         <textarea class="dp-note" id="dp-note" placeholder="Add your notes for this session…" rows="3"></textarea>
         <button class="dp-save-note" id="dp-save-note">Save Note</button>
       </div>
-
       <div class="dp-trades-header">
         <span>Trades</span>
         <span id="dp-count">—</span>

@@ -19,7 +19,7 @@ if (Test-Path $SourceScript) {
 # Remove existing task if present
 Unregister-ScheduledTask -TaskName $TaskName -Confirm:$false -ErrorAction SilentlyContinue
 
-# Create the task — runs at 11:30 AM ET, Mon–Fri
+# Create the task - runs at 11:30 AM ET, Mon-Fri
 $action  = New-ScheduledTaskAction `
     -Execute "powershell.exe" `
     -Argument "-NonInteractive -WindowStyle Hidden -ExecutionPolicy Bypass -File `"$ScriptPath`""
@@ -49,10 +49,11 @@ Register-ScheduledTask `
 
 Write-Host ""
 Write-Host "Task '$TaskName' created successfully!"
-Write-Host "Runs: Mon–Fri at 11:30 AM (your local time)"
+Write-Host "Runs: Mon-Fri at 11:30 AM (your local time)"
 Write-Host ""
 Write-Host "To test manually right now:"
-Write-Host "  powershell -File `"$ScriptPath`" -Debug"
+Write-Host "  powershell -File $ScriptPath -Debug"
 Write-Host ""
 Write-Host "To view logs:"
-Write-Host "  notepad `"$env:USERPROFILE\Documents\NinjaTrader 8\pbf_sync_log.txt`""
+$logPath = "$env:USERPROFILE\Documents\NinjaTrader 8\pbf_sync_log.txt"
+Write-Host "  notepad $logPath"
