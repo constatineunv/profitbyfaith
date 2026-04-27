@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet" />
   <link rel="canonical" href="https://profitbyfaith.com/trades/" />
-  <link rel="stylesheet" href="journal.css?v=7" />
+  <link rel="stylesheet" href="journal.css?v=8" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body>
@@ -35,61 +35,6 @@
   <p>Every session. Every trade. Green days and red days — all of it.</p>
 </header>
 
-<!-- STATISTICS + PERFORMANCE -->
-<div class="wrap section-gap bottom-grid">
-
-  <div class="stats-panel">
-    <h2 class="section-title">Statistics</h2>
-
-    <div class="sp-row sp-row-bar">
-      <span class="sp-label">Direction Split</span>
-      <div class="sp-bar">
-        <div class="sp-bar-long"  id="sp-bar-long"  style="width:50%"></div>
-        <div class="sp-bar-short" id="sp-bar-short" style="width:50%"></div>
-      </div>
-      <div class="sp-bar-legend">
-        <span class="leg-long"><span class="leg-dot teal"></span>Long <b id="sp-long-pct">—%</b></span>
-        <span class="leg-short"><span class="leg-dot red"></span>Short <b id="sp-short-pct">—%</b></span>
-      </div>
-    </div>
-
-    <div class="sp-row">
-      <span class="sp-label">Best Day</span>
-      <span class="sp-val green" id="sp-best">—</span>
-    </div>
-    <div class="sp-row">
-      <span class="sp-label">Worst Day</span>
-      <span class="sp-val red" id="sp-worst">—</span>
-    </div>
-    <div class="sp-row">
-      <span class="sp-label">Avg Daily P&amp;L</span>
-      <span class="sp-val" id="sp-avg">—</span>
-    </div>
-    <div class="sp-row">
-      <span class="sp-label">Total Trades</span>
-      <span class="sp-val" id="sp-total-trades">—</span>
-    </div>
-    <div class="sp-row">
-      <span class="sp-label">Avg Trades / Day</span>
-      <span class="sp-val" id="sp-avg-trades">—</span>
-    </div>
-  </div>
-
-  <div class="perf-panel">
-    <div class="perf-hdr">
-      <div>
-        <h2 class="section-title">Performance</h2>
-        <p class="section-sub">Cumulative P&amp;L</p>
-      </div>
-      <div class="perf-total" id="perf-total">—</div>
-    </div>
-    <div class="chart-wrap">
-      <canvas id="equity-chart"></canvas>
-    </div>
-  </div>
-
-</div>
-
 <!-- ═══════════════════════════════════════════
      LIVE SESSION RECAP
 ═══════════════════════════════════════════ -->
@@ -106,8 +51,33 @@
 </section>
 </div>
 
-<!-- STAT CARDS -->
-<div class="wrap">
+<!-- MONTHLY CALENDAR -->
+<div class="wrap section-gap">
+  <div class="section-hdr">
+    <h2 class="section-title">Monthly Detail</h2>
+    <div class="month-stats-row">
+      <span class="ms-chip"><span class="ms-val" id="ms-pnl">—</span><span class="ms-lbl">Month P&L</span></span>
+      <span class="ms-chip"><span class="ms-val green" id="ms-green">—</span><span class="ms-lbl">Green</span></span>
+      <span class="ms-chip"><span class="ms-val red" id="ms-red">—</span><span class="ms-lbl">Red</span></span>
+      <span class="ms-chip"><span class="ms-val gold" id="ms-rate">—%</span><span class="ms-lbl">Win Rate</span></span>
+    </div>
+  </div>
+
+  <div class="cal-nav">
+    <button class="cal-arrow" id="btn-prev">&#8592;</button>
+    <h3 class="cal-month-title" id="cal-month">Loading…</h3>
+    <button class="cal-arrow" id="btn-next">&#8594;</button>
+  </div>
+  <div class="cal-grid-header">
+    <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
+  </div>
+  <div class="cal-grid" id="cal-grid">
+    <div class="cal-loading">Loading…</div>
+  </div>
+</div>
+
+<!-- STAT CARDS — This Month -->
+<div class="wrap section-gap">
   <div class="stat-cards">
 
     <div class="stat-card">
@@ -149,28 +119,75 @@
   </div>
 </div>
 
-<!-- MONTHLY CALENDAR -->
+<!-- PERFORMANCE -->
 <div class="wrap section-gap">
-  <div class="section-hdr">
-    <h2 class="section-title">Monthly Detail</h2>
-    <div class="month-stats-row">
-      <span class="ms-chip"><span class="ms-val" id="ms-pnl">—</span><span class="ms-lbl">Month P&L</span></span>
-      <span class="ms-chip"><span class="ms-val green" id="ms-green">—</span><span class="ms-lbl">Green</span></span>
-      <span class="ms-chip"><span class="ms-val red" id="ms-red">—</span><span class="ms-lbl">Red</span></span>
-      <span class="ms-chip"><span class="ms-val gold" id="ms-rate">—%</span><span class="ms-lbl">Win Rate</span></span>
+  <div class="perf-panel">
+    <div class="perf-hdr">
+      <div>
+        <h2 class="section-title">Performance</h2>
+        <p class="section-sub">Cumulative P&amp;L</p>
+      </div>
+      <div class="perf-total" id="perf-total">—</div>
+    </div>
+    <div class="chart-wrap">
+      <canvas id="equity-chart"></canvas>
     </div>
   </div>
+</div>
 
-  <div class="cal-nav">
-    <button class="cal-arrow" id="btn-prev">&#8592;</button>
-    <h3 class="cal-month-title" id="cal-month">Loading…</h3>
-    <button class="cal-arrow" id="btn-next">&#8594;</button>
+<!-- YEARLY CALENDAR -->
+<div class="wrap section-gap">
+  <div class="section-hdr">
+    <h2 class="section-title">Yearly Calendar</h2>
+    <div class="ytabs">
+      <button class="ytab active" data-mode="pnl">P&amp;L</button>
+      <button class="ytab" data-mode="trades">Trades</button>
+    </div>
   </div>
-  <div class="cal-grid-header">
-    <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
+  <div class="yearly-scroll">
+    <table class="yearly-table" id="yearly-table">
+      <tbody id="yearly-body"></tbody>
+    </table>
   </div>
-  <div class="cal-grid" id="cal-grid">
-    <div class="cal-loading">Loading…</div>
+</div>
+
+<!-- STATISTICS -->
+<div class="wrap section-gap">
+  <div class="stats-panel">
+    <h2 class="section-title">Statistics</h2>
+
+    <div class="sp-row sp-row-bar">
+      <span class="sp-label">Direction Split</span>
+      <div class="sp-bar">
+        <div class="sp-bar-long"  id="sp-bar-long"  style="width:50%"></div>
+        <div class="sp-bar-short" id="sp-bar-short" style="width:50%"></div>
+      </div>
+      <div class="sp-bar-legend">
+        <span class="leg-long"><span class="leg-dot teal"></span>Long <b id="sp-long-pct">—%</b></span>
+        <span class="leg-short"><span class="leg-dot red"></span>Short <b id="sp-short-pct">—%</b></span>
+      </div>
+    </div>
+
+    <div class="sp-row">
+      <span class="sp-label">Best Day</span>
+      <span class="sp-val green" id="sp-best">—</span>
+    </div>
+    <div class="sp-row">
+      <span class="sp-label">Worst Day</span>
+      <span class="sp-val red" id="sp-worst">—</span>
+    </div>
+    <div class="sp-row">
+      <span class="sp-label">Avg Daily P&amp;L</span>
+      <span class="sp-val" id="sp-avg">—</span>
+    </div>
+    <div class="sp-row">
+      <span class="sp-label">Total Trades</span>
+      <span class="sp-val" id="sp-total-trades">—</span>
+    </div>
+    <div class="sp-row">
+      <span class="sp-label">Avg Trades / Day</span>
+      <span class="sp-val" id="sp-avg-trades">—</span>
+    </div>
   </div>
 </div>
 
@@ -224,22 +241,6 @@
   </div>
 </div>
 
-<!-- YEARLY CALENDAR -->
-<div class="wrap section-gap">
-  <div class="section-hdr">
-    <h2 class="section-title">Yearly Calendar</h2>
-    <div class="ytabs">
-      <button class="ytab active" data-mode="pnl">P&amp;L</button>
-      <button class="ytab" data-mode="trades">Trades</button>
-    </div>
-  </div>
-  <div class="yearly-scroll">
-    <table class="yearly-table" id="yearly-table">
-      <tbody id="yearly-body"></tbody>
-    </table>
-  </div>
-</div>
-
 <!-- DAY PANEL -->
 <div class="day-panel" id="day-panel">
   <div class="day-panel-inner">
@@ -270,6 +271,6 @@
   </div>
 </footer>
 
-<script src="journal.js?v=7"></script>
+<script src="journal.js?v=8"></script>
 </body>
 </html>

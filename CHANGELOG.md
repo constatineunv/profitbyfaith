@@ -2,6 +2,17 @@
 
 ---
 
+## [2026-04-27] refactor: reorder journal sections for daily trader workflow
+
+**Files changed:** `trades/index.html`
+
+- New section order: Live Session Recap → Monthly Detail (cal-grid) → This Month stat cards → Performance/Equity Chart → Yearly Calendar → Statistics → Global Overview
+- Split the old combined `bottom-grid` wrapper (Statistics + Performance side-by-side) into two independent `<div class="wrap section-gap">` blocks so each section can appear in a different position
+- No IDs, classes, or content changed — HTML blocks moved only
+- Bumped to `?v=8`
+
+---
+
 ## [2026-04-27] refactor: move Statistics + Performance above Live Session Recap
 
 **Files changed:** `trades/index.html`
