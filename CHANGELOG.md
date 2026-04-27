@@ -2,6 +2,18 @@
 
 ---
 
+## [2026-04-27] feat: recap to top; add account to API; fix firm grouping for TPT/Bulenox
+
+**Files changed:** `functions/api/journal.js`, `trades/index.html`, `trades/journal.js`
+
+- Moved Live Session Recap to be the first section on the page (right under Trade Journal header)
+- API worker (`functions/api/journal.js`) now includes `account` field in every trade object — this was the bug preventing Bulenox/TPT per-firm grouping from working
+- `firmClass`/`firmLabel` updated: Bulenox checked first (`bx-`/`bulenox`), then TPT (`take`/`profit539`/`tpt`), then Apex as default
+- Day detail panel insertion point moved back to after the calendar `.wrap` (not the recap)
+- Bumped to `?v=6` to bust browser cache
+
+---
+
 ## [2026-04-27] feat: add live session recap section above monthly calendar
 
 **Files changed:** `trades/index.html`, `trades/journal.css`, `trades/journal.js`
