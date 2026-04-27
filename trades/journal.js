@@ -878,3 +878,15 @@ function isoDate(y, m, d) {
 
 /* ── Boot ── */
 loadJournalData();
+
+/* ── Auto-refresh recap every 5 min so daily session data updates live ── */
+setInterval(async () => {
+  try {
+    const res  = await fetch('/api/journal');
+    const data = await res.json();
+    if (data.dates && Object.keys(data.dates).length) {
+      journalData = data.dates;
+      buildRecap();
+    }
+  } catch (e) { /* silent — page stays functional if poll fails */ }
+}, 5 * 60 * 1000);
