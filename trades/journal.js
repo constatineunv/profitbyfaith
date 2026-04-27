@@ -857,6 +857,16 @@ document.getElementById('dp-save-note').addEventListener('click', () => {
 document.getElementById('dp-close').addEventListener('click', closePanel);
 document.getElementById('dp-overlay').addEventListener('click', closePanel);
 
+/* Click outside day detail → close it */
+document.addEventListener('click', (e) => {
+  if (!activeDate) return;
+  const detail = document.getElementById('pbf-day-detail');
+  if (!detail) return;
+  if (detail.contains(e.target)) return;       // click inside detail — ignore
+  if (e.target.closest('.cal-cell')) return;    // click on a cal cell — openPanel handles it
+  closePanel();
+});
+
 /* ── Helpers ── */
 function isoDate(y, m, d) {
   return `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
