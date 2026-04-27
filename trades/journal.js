@@ -216,14 +216,14 @@ function buildRecap() {
 
   const firmClass = (acct) => {
     const a = (acct || '').toLowerCase();
-    if (a.includes('take') || a.includes('profit539')) return 'tpt';
-    if (a.includes('bx-')  || a.includes('bulenox'))   return 'bulenox';
-    return 'apex';
+    if (a.includes('bx-') || a.includes('bulenox'))                      return 'bulenox';
+    if (a.includes('take') || a.includes('profit539') || a.includes('tpt')) return 'tpt';
+    return 'apex'; // APEX*, PAAPEX*, Sim101 all treated as Apex
   };
   const firmLabel = (acct) => {
     const a = (acct || '').toLowerCase();
-    if (a.includes('take') || a.includes('profit539')) return 'TakeProfitTrader';
-    if (a.includes('bx-')  || a.includes('bulenox'))   return 'Bulenox';
+    if (a.includes('bx-') || a.includes('bulenox'))                      return 'Bulenox';
+    if (a.includes('take') || a.includes('profit539') || a.includes('tpt')) return 'TakeProfitTrader';
     return 'Apex';
   };
   const tagClass = (p) => p > 50 ? 'good' : p < -100 ? 'bad' : 'ugly';
@@ -779,10 +779,10 @@ function openPanel(dateStr, day) {
     </div>
   </div>`;
 
-  // Insert after the recap's .wrap container so detail gets its own full-width wrap
-  const recapWrap = (document.getElementById('live-recap') || {}).parentElement
+  // Insert after the calendar's .wrap so day detail sits directly below the calendar
+  const calWrap = document.getElementById('cal-grid').closest('.wrap')
     || document.getElementById('cal-grid').parentElement;
-  recapWrap.insertAdjacentHTML('afterend', `<div class="wrap" id="pbf-day-detail-wrap">${html}</div>`);
+  calWrap.insertAdjacentHTML('afterend', `<div class="wrap" id="pbf-day-detail-wrap">${html}</div>`);
 
   // Build chart after DOM insertion
   requestAnimationFrame(() => buildInlineEquityChart(trades));

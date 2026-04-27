@@ -36,6 +36,7 @@ export async function onRequest(context) {
         dates[iso].trades.push({
           num:        r[0],
           instrument: r[1],
+          account:    r[2],
           direction:  r[4],
           entryPrice: r[6],
           exitPrice:  r[7],
