@@ -2,6 +2,18 @@
 
 ---
 
+## [2026-04-27] feat: auto-refresh recap every 5 min for live daily session updates
+
+**Files changed:** `trades/journal.js`
+
+- Added `setInterval` (5-minute poll) at boot that silently re-fetches `/api/journal` and rebuilds only the recap section
+- Full calendar/charts are NOT re-rendered on poll — only `buildRecap()` runs
+- Poll is silent-fail: if the network request fails the rest of the page stays functional
+- Combined with the API's 5-min cache (`max-age=300`), the recap will reflect new trades within ~10 minutes of them being uploaded to the sheet
+- Works across all weekdays automatically — no manual trigger needed
+
+---
+
 ## [2026-04-27] feat: recap to top; add account to API; fix firm grouping for TPT/Bulenox
 
 **Files changed:** `functions/api/journal.js`, `trades/index.html`, `trades/journal.js`
