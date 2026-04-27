@@ -2,6 +2,17 @@
 
 ---
 
+## [2026-04-27] refactor: move Statistics + Performance above Live Session Recap
+
+**Files changed:** `trades/index.html`
+
+- Moved the `<!-- STATISTICS + PERFORMANCE -->` block (Statistics panel + Performance/equity chart) to render directly above the Live Session Recap section
+- New page order: Trade Journal header → Statistics + Performance → Live Session Recap → Monthly Stat Cards → Monthly Calendar → Global Overview → Yearly Calendar
+- No JS or CSS changes — purely an HTML section reorder
+- Bumped to `?v=7` to bust browser cache
+
+---
+
 ## [2026-04-27] feat: auto-refresh recap every 5 min for live daily session updates
 
 **Files changed:** `trades/journal.js`

@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet" />
   <link rel="canonical" href="https://profitbyfaith.com/trades/" />
-  <link rel="stylesheet" href="journal.css?v=6" />
+  <link rel="stylesheet" href="journal.css?v=7" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body>
@@ -34,6 +34,61 @@
   <h1>Trade Journal</h1>
   <p>Every session. Every trade. Green days and red days — all of it.</p>
 </header>
+
+<!-- STATISTICS + PERFORMANCE -->
+<div class="wrap section-gap bottom-grid">
+
+  <div class="stats-panel">
+    <h2 class="section-title">Statistics</h2>
+
+    <div class="sp-row sp-row-bar">
+      <span class="sp-label">Direction Split</span>
+      <div class="sp-bar">
+        <div class="sp-bar-long"  id="sp-bar-long"  style="width:50%"></div>
+        <div class="sp-bar-short" id="sp-bar-short" style="width:50%"></div>
+      </div>
+      <div class="sp-bar-legend">
+        <span class="leg-long"><span class="leg-dot teal"></span>Long <b id="sp-long-pct">—%</b></span>
+        <span class="leg-short"><span class="leg-dot red"></span>Short <b id="sp-short-pct">—%</b></span>
+      </div>
+    </div>
+
+    <div class="sp-row">
+      <span class="sp-label">Best Day</span>
+      <span class="sp-val green" id="sp-best">—</span>
+    </div>
+    <div class="sp-row">
+      <span class="sp-label">Worst Day</span>
+      <span class="sp-val red" id="sp-worst">—</span>
+    </div>
+    <div class="sp-row">
+      <span class="sp-label">Avg Daily P&amp;L</span>
+      <span class="sp-val" id="sp-avg">—</span>
+    </div>
+    <div class="sp-row">
+      <span class="sp-label">Total Trades</span>
+      <span class="sp-val" id="sp-total-trades">—</span>
+    </div>
+    <div class="sp-row">
+      <span class="sp-label">Avg Trades / Day</span>
+      <span class="sp-val" id="sp-avg-trades">—</span>
+    </div>
+  </div>
+
+  <div class="perf-panel">
+    <div class="perf-hdr">
+      <div>
+        <h2 class="section-title">Performance</h2>
+        <p class="section-sub">Cumulative P&amp;L</p>
+      </div>
+      <div class="perf-total" id="perf-total">—</div>
+    </div>
+    <div class="chart-wrap">
+      <canvas id="equity-chart"></canvas>
+    </div>
+  </div>
+
+</div>
 
 <!-- ═══════════════════════════════════════════
      LIVE SESSION RECAP
@@ -185,61 +240,6 @@
   </div>
 </div>
 
-<!-- STATISTICS + PERFORMANCE -->
-<div class="wrap section-gap bottom-grid">
-
-  <div class="stats-panel">
-    <h2 class="section-title">Statistics</h2>
-
-    <div class="sp-row sp-row-bar">
-      <span class="sp-label">Direction Split</span>
-      <div class="sp-bar">
-        <div class="sp-bar-long"  id="sp-bar-long"  style="width:50%"></div>
-        <div class="sp-bar-short" id="sp-bar-short" style="width:50%"></div>
-      </div>
-      <div class="sp-bar-legend">
-        <span class="leg-long"><span class="leg-dot teal"></span>Long <b id="sp-long-pct">—%</b></span>
-        <span class="leg-short"><span class="leg-dot red"></span>Short <b id="sp-short-pct">—%</b></span>
-      </div>
-    </div>
-
-    <div class="sp-row">
-      <span class="sp-label">Best Day</span>
-      <span class="sp-val green" id="sp-best">—</span>
-    </div>
-    <div class="sp-row">
-      <span class="sp-label">Worst Day</span>
-      <span class="sp-val red" id="sp-worst">—</span>
-    </div>
-    <div class="sp-row">
-      <span class="sp-label">Avg Daily P&amp;L</span>
-      <span class="sp-val" id="sp-avg">—</span>
-    </div>
-    <div class="sp-row">
-      <span class="sp-label">Total Trades</span>
-      <span class="sp-val" id="sp-total-trades">—</span>
-    </div>
-    <div class="sp-row">
-      <span class="sp-label">Avg Trades / Day</span>
-      <span class="sp-val" id="sp-avg-trades">—</span>
-    </div>
-  </div>
-
-  <div class="perf-panel">
-    <div class="perf-hdr">
-      <div>
-        <h2 class="section-title">Performance</h2>
-        <p class="section-sub">Cumulative P&amp;L</p>
-      </div>
-      <div class="perf-total" id="perf-total">—</div>
-    </div>
-    <div class="chart-wrap">
-      <canvas id="equity-chart"></canvas>
-    </div>
-  </div>
-
-</div>
-
 <!-- DAY PANEL -->
 <div class="day-panel" id="day-panel">
   <div class="day-panel-inner">
@@ -270,6 +270,6 @@
   </div>
 </footer>
 
-<script src="journal.js?v=6"></script>
+<script src="journal.js?v=7"></script>
 </body>
 </html>
