@@ -109,12 +109,161 @@ async function loadJournalData() {
 }
 
 function renderAll() {
+  buildRecap();
   computeAndRenderStatCards();
   renderGlobalCards(null, 'All Time');
   renderYearlyTable();
   renderStatsPanel();
   renderEquityCurve();
   renderCalendar();
+}
+
+/* ════════════════════════════════════════════════
+   LIVE SESSION RECAP
+════════════════════════════════════════════════ */
+let recapChartInst = null;
+
+function buildRecap() {
+  const now      = new Date();
+  const todayKey = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+  const keys     = Object.keys(journalData).sort().reverse();
+  const key      = journalData[todayKey] ? todayKey : keys[0];
+  if (!key) return;
+
+  const day    = journalData[key];
+  const trades = day.trades || [];
+  const d      = new Date(key + 'T12:00:00');
+  const label  = d.toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric', year:'numeric' });
+
+  const dateEl = document.getElementById('recap-date-title');
+  if (dateEl) dateEl.textContent = label;
+
+  const totalPnl  = day.pnl;
+  const wins      = trades.filter(t => (t.profit||0) > 50).length;
+  const losses    = trades.filter(t => (t.profit||0) < -100).length;
+  const scratches = trades.length - wins - losses;
+  const winRate   = trades.length > 0 ? Math.round(wins / trades.length * 100) : 0;
+  const best      = trades.length ? Math.max(...trades.map(t => t.profit||0)) : 0;
+  const worst     = trades.length ? Math.min(...trades.map(t => t.profit||0)) : 0;
+  const avgWin    = wins > 0
+    ? Math.round(trades.filter(t => (t.profit||0) > 0).reduce((s,t) => s + (t.profit||0), 0) / wins)
+    : 0;
+
+  const fmtD = (n) => (n >= 0 ? '+$' : '-$') + Math.abs(n).toLocaleString('en-US', { minimumFractionDigits: 2 });
+
+  const statsEl = document.getElementById('recap-stats');
+  if (!statsEl) return;
+
+  const statData = [
+    { label: 'Session P&L', val: fmtD(totalPnl), cls: totalPnl >= 0 ? 'green' : 'red', meta: 'all accounts' },
+    { label: 'Trades',      val: trades.length,   cls: '',                               meta: `${wins}W · ${losses}L · ${scratches} scratch` },
+    { label: 'Win Rate',    val: winRate + '%',   cls: winRate >= 50 ? 'green' : 'red', meta: 'by trade count' },
+    { label: 'Best',        val: fmtD(best),      cls: 'green',                          meta: 'top trade' },
+    { label: 'Worst',       val: fmtD(worst),     cls: 'red',                            meta: 'worst trade' },
+    { label: 'Avg Win',     val: '$' + avgWin,    cls: 'gold',                           meta: 'per winning trade' },
+  ];
+
+  statsEl.innerHTML = statData.map(s => `
+    <div class="recap-stat-card">
+      <div class="recap-stat-label">${s.label}</div>
+      <div class="recap-stat-val ${s.cls}">${s.val}</div>
+      <div class="recap-stat-meta">${s.meta}</div>
+    </div>`).join('');
+
+  const canvas = document.getElementById('recapChart');
+  if (canvas && typeof Chart !== 'undefined') {
+    if (recapChartInst) recapChartInst.destroy();
+    recapChartInst = new Chart(canvas, {
+      type: 'bar',
+      data: {
+        labels: trades.map((_, i) => '#' + (i + 1)),
+        datasets: [{
+          data: trades.map(t => parseFloat((t.profit || 0).toFixed(2))),
+          backgroundColor: trades.map(t =>
+            (t.profit||0) > 50 ? '#4caf82' :
+            (t.profit||0) < -50 ? '#e05252' : '#888780'
+          ),
+          borderWidth: 0,
+          borderRadius: 2,
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: { label: c => (c.parsed.y >= 0 ? '+$' : '-$') + Math.abs(c.parsed.y).toFixed(2) },
+            backgroundColor: '#0d1526',
+            titleColor: '#c9a84c',
+            bodyColor: '#ffffff'
+          }
+        },
+        scales: {
+          x: { grid: { display: false }, ticks: { color: '#7a8ba8', font: { size: 9 }, maxRotation: 0 }, border: { display: false } },
+          y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#7a8ba8', font: { size: 9 }, callback: v => (v >= 0 ? '+' : '') + '$' + v }, border: { display: false } }
+        }
+      }
+    });
+  }
+
+  const acctGroups = {};
+  trades.forEach(t => {
+    const acct = t.account || 'Unknown';
+    if (!acctGroups[acct]) acctGroups[acct] = [];
+    acctGroups[acct].push(t);
+  });
+
+  const firmClass = (acct) => {
+    const a = (acct || '').toLowerCase();
+    if (a.includes('take') || a.includes('profit539')) return 'tpt';
+    if (a.includes('bx-')  || a.includes('bulenox'))   return 'bulenox';
+    return 'apex';
+  };
+  const firmLabel = (acct) => {
+    const a = (acct || '').toLowerCase();
+    if (a.includes('take') || a.includes('profit539')) return 'TakeProfitTrader';
+    if (a.includes('bx-')  || a.includes('bulenox'))   return 'Bulenox';
+    return 'Apex';
+  };
+  const tagClass = (p) => p > 50 ? 'good' : p < -100 ? 'bad' : 'ugly';
+
+  let html = `<div class="recap-col-head">
+    <span>#</span><span>dir</span><span>entry &rarr; exit</span><span>account</span><span>tag</span><span style="text-align:right">p&l</span>
+  </div>`;
+
+  Object.entries(acctGroups).forEach(([acct, rows]) => {
+    const acctTotal = rows.reduce((s, t) => s + (t.profit || 0), 0);
+    const fc = firmClass(acct);
+    const fl = firmLabel(acct);
+    const badge = fc === 'tpt' ? 'TPT' : fc === 'apex' ? 'APEX' : 'BUL';
+
+    html += `<div class="recap-acct-group">
+      <span>${fl}</span>
+      <span class="recap-firm-badge ${fc}">${badge}</span>
+    </div>`;
+
+    rows.forEach((t, i) => {
+      const p   = t.profit || 0;
+      const dir = (t.direction || '').toLowerCase();
+      const tag = tagClass(p);
+      const ep  = t.entryPrice || '—';
+      const xp  = t.exitPrice  || '—';
+      html += `<div class="recap-trade-row">
+        <span style="color:#7a8ba8;font-size:0.68rem">${i + 1}</span>
+        <span class="dir-badge ${dir}">${dir}</span>
+        <span style="font-family:monospace;font-size:0.72rem;color:#a0a8b8">${ep} &rarr; ${xp}</span>
+        <span style="font-size:0.68rem;color:#7a8ba8">${fl}</span>
+        <span class="tag-badge ${tag}">${tag}</span>
+        <span style="text-align:right;font-family:monospace;font-size:0.75rem;font-weight:600;color:${p >= 0 ? 'var(--win)' : 'var(--loss)'}">${p >= 0 ? '+$' : '-$'}${Math.abs(p).toFixed(2)}</span>
+      </div>`;
+    });
+
+    html += `<div class="recap-acct-total" style="color:${acctTotal >= 0 ? 'var(--win)' : 'var(--loss)'}">${fl}: ${fmtD(acctTotal)}</div>`;
+  });
+
+  const tableEl = document.getElementById('recap-table');
+  if (tableEl) tableEl.innerHTML = html;
 }
 
 /* ── Compute stats (scoped to a date prefix, or all if prefix is null) ── */

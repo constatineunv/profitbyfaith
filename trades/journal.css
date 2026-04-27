@@ -888,3 +888,151 @@ body {
   border: 1px solid rgba(201,168,76,0.7) !important;
   background: rgba(201,168,76,0.07) !important;
 }
+
+/* ════════════════════════════════════════════════
+   LIVE SESSION RECAP
+════════════════════════════════════════════════ */
+.recap-section {
+  padding: 2rem 0 1rem;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  margin-bottom: 2rem;
+}
+.recap-eyebrow {
+  font-size: 0.65rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 0.4rem;
+}
+.recap-date {
+  font-size: clamp(1.4rem, 3vw, 2rem);
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 0.2rem;
+  border: none;
+  padding: 0;
+}
+.recap-date::before { display: none; }
+.recap-tagline {
+  font-size: 0.78rem;
+  font-style: italic;
+  color: var(--gold);
+  margin-bottom: 1.5rem;
+  opacity: 0.75;
+}
+.recap-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 10px;
+  margin-bottom: 1.25rem;
+}
+.recap-stat-card {
+  background: var(--card);
+  border-radius: 8px;
+  padding: 12px 14px;
+  border: 1px solid rgba(255,255,255,0.06);
+}
+.recap-stat-label {
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: var(--muted);
+  margin-bottom: 5px;
+}
+.recap-stat-val {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.2;
+}
+.recap-stat-val.green { color: var(--win); }
+.recap-stat-val.red   { color: var(--loss); }
+.recap-stat-val.gold  { color: var(--gold); }
+.recap-stat-meta {
+  font-size: 0.68rem;
+  color: var(--muted);
+  margin-top: 3px;
+}
+.recap-chart-wrap {
+  position: relative;
+  width: 100%;
+  height: 130px;
+  margin-bottom: 1.25rem;
+}
+.recap-trade-table {
+  background: var(--card);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 1rem;
+}
+.recap-acct-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  background: rgba(255,255,255,0.03);
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--text-secondary, #a0a8b8);
+}
+.recap-firm-badge {
+  font-size: 0.58rem;
+  font-family: monospace;
+  padding: 1px 6px;
+  border-radius: 3px;
+  letter-spacing: 0.04em;
+}
+.recap-firm-badge.apex    { background: rgba(201,168,76,0.12); color: #c9a84c; border: 1px solid rgba(201,168,76,0.25); }
+.recap-firm-badge.tpt     { background: rgba(76,175,130,0.12); color: #4caf82; border: 1px solid rgba(76,175,130,0.25); }
+.recap-firm-badge.bulenox { background: rgba(91,140,204,0.12); color: #7aaae8; border: 1px solid rgba(91,140,204,0.25); }
+.recap-trade-row {
+  display: grid;
+  grid-template-columns: 28px 52px 1fr 80px 52px 72px;
+  gap: 6px;
+  padding: 6px 14px;
+  font-size: 0.75rem;
+  align-items: center;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.recap-trade-row:last-child { border-bottom: none; }
+.recap-trade-row:hover { background: rgba(255,255,255,0.02); }
+.recap-col-head {
+  display: grid;
+  grid-template-columns: 28px 52px 1fr 80px 52px 72px;
+  gap: 6px;
+  padding: 6px 14px;
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--muted);
+  background: rgba(255,255,255,0.02);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.recap-acct-total {
+  display: flex;
+  justify-content: flex-end;
+  padding: 5px 14px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  background: rgba(255,255,255,0.02);
+  border-top: 1px solid rgba(255,255,255,0.05);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.dir-badge {
+  font-size: 0.62rem;
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-weight: 500;
+}
+.dir-badge.long  { background: rgba(76,175,130,0.15); color: var(--win); }
+.dir-badge.short { background: rgba(224,82,82,0.15);  color: var(--loss); }
+.tag-badge {
+  font-size: 0.6rem;
+  padding: 1px 5px;
+  border-radius: 3px;
+}
+.tag-badge.good { background: rgba(76,175,130,0.12); color: var(--win); }
+.tag-badge.bad  { background: rgba(224,82,82,0.12);  color: var(--loss); }
+.tag-badge.ugly { background: rgba(136,135,128,0.12); color: #888780; }
