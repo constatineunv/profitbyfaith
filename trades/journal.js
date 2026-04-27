@@ -779,9 +779,9 @@ function openPanel(dateStr, day) {
     </div>
   </div>`;
 
-  // Insert after the calendar section
-  const calSection = document.getElementById('cal-grid').closest('section') || document.getElementById('cal-grid').parentElement;
-  calSection.insertAdjacentHTML('afterend', html);
+  // Insert after the live recap section (so day detail sits below recap)
+  const anchor = document.getElementById('live-recap') || document.getElementById('cal-grid').parentElement;
+  anchor.insertAdjacentHTML('afterend', html);
 
   // Build chart after DOM insertion
   requestAnimationFrame(() => buildInlineEquityChart(trades));
