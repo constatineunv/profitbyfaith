@@ -779,9 +779,10 @@ function openPanel(dateStr, day) {
     </div>
   </div>`;
 
-  // Insert after the live recap section (so day detail sits below recap)
-  const anchor = document.getElementById('live-recap') || document.getElementById('cal-grid').parentElement;
-  anchor.insertAdjacentHTML('afterend', html);
+  // Insert after the recap's .wrap container so detail gets its own full-width wrap
+  const recapWrap = (document.getElementById('live-recap') || {}).parentElement
+    || document.getElementById('cal-grid').parentElement;
+  recapWrap.insertAdjacentHTML('afterend', `<div class="wrap" id="pbf-day-detail-wrap">${html}</div>`);
 
   // Build chart after DOM insertion
   requestAnimationFrame(() => buildInlineEquityChart(trades));
@@ -797,7 +798,10 @@ function closePanel() {
   if (el) {
     el.style.opacity = '0';
     el.style.transform = 'translateY(-8px)';
-    setTimeout(() => el.remove(), 200);
+    setTimeout(() => {
+      const wrap = document.getElementById('pbf-day-detail-wrap');
+      if (wrap) wrap.remove(); else el.remove();
+    }, 200);
   }
   document.querySelectorAll('.cal-cell.pbf-selected').forEach(c => c.classList.remove('pbf-selected'));
   if (_inlineChart) { _inlineChart.destroy(); _inlineChart = null; }
