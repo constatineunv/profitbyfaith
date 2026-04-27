@@ -751,3 +751,140 @@ body {
 @media (max-width: 420px) {
   .stat-cards { grid-template-columns: 1fr 1fr; }
 }
+
+/* ── PBF Inline Day Detail ── */
+.pbf-day-detail {
+  background: var(--card);
+  border: 1px solid rgba(201,168,76,0.25);
+  border-radius: 12px;
+  margin: 1.25rem 0 0;
+  overflow: hidden;
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  animation: pbfSlideIn 0.2s ease;
+}
+@keyframes pbfSlideIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.pbf-dd-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 1rem 1.25rem;
+  background: rgba(255,255,255,0.03);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.pbf-dd-eyebrow {
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 3px;
+}
+.pbf-dd-title {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--text);
+}
+.pbf-dd-firms { display: flex; gap: 5px; margin-top: 6px; flex-wrap: wrap; }
+.pbf-firm-badge {
+  font-size: 0.6rem;
+  font-family: 'DM Mono', monospace;
+  padding: 1px 6px;
+  border-radius: 3px;
+  letter-spacing: 0.04em;
+}
+.pbf-firm-badge.apex    { background: rgba(201,168,76,0.12); color: #c9a84c; border: 1px solid rgba(201,168,76,0.25); }
+.pbf-firm-badge.tpt     { background: rgba(76,175,130,0.12); color: #4caf82; border: 1px solid rgba(76,175,130,0.25); }
+.pbf-firm-badge.bulenox { background: rgba(91,140,204,0.12); color: #7aaae8; border: 1px solid rgba(91,140,204,0.25); }
+.pbf-dd-header-right { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+.pbf-dd-pnl { font-size: 1.1rem; font-weight: 600; }
+.pbf-dd-pnl.green { color: var(--win); }
+.pbf-dd-pnl.red   { color: var(--loss); }
+.pbf-dd-close {
+  background: none; border: none; color: var(--muted); cursor: pointer;
+  font-size: 1.1rem; line-height: 1; padding: 2px 4px;
+}
+.pbf-dd-close:hover { color: var(--text); }
+.pbf-dd-body { padding: 1rem 1.25rem; }
+
+.pbf-dd-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-bottom: 1.25rem;
+}
+.pbf-mini-stat {
+  background: rgba(255,255,255,0.04);
+  border-radius: 6px;
+  padding: 8px 10px;
+  text-align: center;
+}
+.pbf-mini-label { font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted); margin-bottom: 4px; }
+.pbf-mini-val   { font-size: 1rem; font-weight: 600; color: var(--text); }
+.pbf-mini-val.green { color: var(--win); }
+.pbf-mini-val.red   { color: var(--loss); }
+
+.pbf-dd-section { margin-bottom: 1.25rem; }
+.pbf-dd-section-label {
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: var(--muted);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  padding-bottom: 5px;
+  margin-bottom: 8px;
+}
+
+.pbf-tut-row { padding: 7px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+.pbf-tut-row:last-child { border-bottom: none; }
+.pbf-tut-title { font-size: 0.82rem; color: #c9a84c; font-weight: 500; text-decoration: none; }
+.pbf-tut-title:hover { text-decoration: underline; }
+.pbf-tut-note  { font-size: 0.72rem; color: var(--muted); margin-top: 2px; }
+
+.pbf-dd-notes {
+  width: 100%;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 6px;
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  padding: 8px 10px;
+  resize: vertical;
+  min-height: 64px;
+}
+.pbf-dd-notes:focus { outline: none; border-color: rgba(201,168,76,0.4); }
+.pbf-dd-save {
+  margin-top: 6px;
+  background: transparent;
+  border: 1px solid rgba(201,168,76,0.35);
+  border-radius: 6px;
+  color: #c9a84c;
+  cursor: pointer;
+  font-size: 0.75rem;
+  padding: 5px 14px;
+  transition: background 0.15s;
+}
+.pbf-dd-save:hover { background: rgba(201,168,76,0.1); }
+.pbf-dd-save.saved { border-color: var(--win); color: var(--win); }
+
+.pbf-verse-block {
+  border-left: 2px solid #c9a84c;
+  padding: 8px 12px;
+  background: rgba(201,168,76,0.06);
+  border-radius: 0 6px 6px 0;
+  margin-top: 1.25rem;
+}
+.pbf-verse-text { font-style: italic; font-size: 0.85rem; color: var(--text); line-height: 1.55; }
+.pbf-verse-ref  { font-size: 0.7rem; color: #8b6e2a; margin-top: 4px; }
+
+/* Selected calendar cell highlight */
+.cal-cell.pbf-selected {
+  border: 1px solid rgba(201,168,76,0.7) !important;
+  background: rgba(201,168,76,0.07) !important;
+}

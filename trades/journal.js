@@ -9,6 +9,82 @@ let activeDate   = null;
 let equityChart  = null;
 let yearlyMode   = 'pnl';
 
+/* ── Session notes data (add per day; tutorials auto-match bad patterns) ── */
+const SESSION_DATA = {
+  '2026-04-27': {
+    verse: { text: 'The plans of the diligent lead surely to abundance, but everyone who is hasty comes only to poverty.', ref: 'Proverbs 21:5' },
+    firms: ['Apex','TakeProfitTrader','Bulenox'],
+    tutorials: [
+      { title: '15-Min ORB — Wait for the Close', url: 'https://www.youtube.com/results?search_query=15+minute+ORB+entry+timing+NQ+futures', note: 'Addresses early entries on Apex-053/054 before ORB formed.' },
+      { title: 'Volume Profile VAH/VAL Confluence', url: 'https://www.youtube.com/results?search_query=volume+profile+VAH+VAL+NQ+futures+confluence', note: 'The 27,380–27,400 rejection zone — knowing VAH stops bad longs.' },
+      { title: 'Revenge Trading & Stop Rules', url: 'https://www.youtube.com/results?search_query=revenge+trading+futures+discipline+stop+rules', note: 'The triple-loss #5→#6→#7 Bulenox sequence.' },
+    ]
+  }
+  /* Add more dates here as you journal each session:
+  '2026-04-28': {
+    verse: { text: '...', ref: '...' },
+    firms: ['Apex','TakeProfitTrader'],
+    tutorials: [...]
+  }
+  */
+};
+
+/* ── Build inline equity chart for a day's trades ── */
+let _inlineChart = null;
+function buildInlineEquityChart(trades) {
+  const canvas = document.getElementById('pbf-inline-equity');
+  if (!canvas) return;
+  if (_inlineChart) { _inlineChart.destroy(); _inlineChart = null; }
+  let cum = 0;
+  const labels = [], values = [];
+  (trades || []).forEach((t, i) => {
+    cum += (t.profit || 0);
+    labels.push('#' + (i + 1));
+    values.push(parseFloat(cum.toFixed(2)));
+  });
+  const final = values[values.length - 1] || 0;
+  const lineColor = final >= 0 ? '#4caf82' : '#e05252';
+  const ctx = canvas.getContext('2d');
+  const grad = ctx.createLinearGradient(0, 0, 0, 120);
+  grad.addColorStop(0, lineColor + '33');
+  grad.addColorStop(1, lineColor + '04');
+  _inlineChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        data: values,
+        borderColor: lineColor,
+        backgroundColor: grad,
+        borderWidth: 1.5,
+        fill: true,
+        tension: 0.3,
+        pointRadius: 0,
+        pointHoverRadius: 4,
+        pointHoverBackgroundColor: lineColor,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#0d1526',
+          titleColor: '#7a8ba8',
+          bodyColor: '#fff',
+          callbacks: {
+            label: (item) => { const v = item.raw; return (v >= 0 ? '+$' : '-$') + Math.abs(v).toLocaleString('en-US', { minimumFractionDigits: 2 }); }
+          }
+        }
+      },
+      scales: {
+        x: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#7a8ba8', font: { size: 10 } }, border: { display: false } },
+        y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#7a8ba8', font: { size: 10 }, callback: v => (v >= 0 ? '+$' : '-$') + Math.abs(v) }, border: { display: false } }
+      }
+    }
+  });
+}
+
 /* ── SVG Gauge Arc ── */
 function gaugeArcPath(pct) {
   const p = Math.min(Math.max(pct, 0), 1);
@@ -438,27 +514,40 @@ function updateMonthStats(y, m) {
 /* ── Day Detail Panel ── */
 function openPanel(dateStr, day) {
   activeDate = dateStr;
+
+  // Close any currently open inline detail first
+  const existing = document.getElementById('pbf-day-detail');
+  if (existing) existing.remove();
+
+  // Un-highlight all calendar cells, highlight the clicked one
+  document.querySelectorAll('.cal-cell.pbf-selected').forEach(c => c.classList.remove('pbf-selected'));
+  document.querySelectorAll('.cal-cell').forEach(c => {
+    const num = c.querySelector('.cal-day-num');
+    if (num) {
+      const d = new Date(dateStr + 'T12:00:00');
+      if (parseInt(num.textContent) === d.getDate()) c.classList.add('pbf-selected');
+    }
+  });
+
   const d     = new Date(dateStr + 'T12:00:00');
   const label = d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
   const pnl   = day.pnl;
   const sign  = pnl >= 0 ? '+' : '';
+  const pnlFmt = `${sign}$${Math.abs(pnl).toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+  const pnlCls = pnl >= 0 ? 'green' : 'red';
 
-  document.getElementById('dp-date').textContent = label;
-  const dpPnl = document.getElementById('dp-pnl');
-  dpPnl.textContent = `${sign}$${Math.abs(pnl).toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
-  dpPnl.className   = 'dp-pnl ' + (pnl >= 0 ? 'green' : 'red');
-  document.getElementById('dp-count').textContent = `${day.count} trade${day.count !== 1 ? 's' : ''}`;
+  const trades  = day.trades || [];
+  const wins    = trades.filter(t => (t.profit || 0) > 0).length;
+  const losses  = trades.filter(t => (t.profit || 0) < 0).length;
+  const note    = localStorage.getItem('pbf-note-' + dateStr) || '';
+  const extra   = SESSION_DATA[dateStr] || {};
+  const verse   = extra.verse;
+  const firms   = extra.firms || [];
+  const tuts    = extra.tutorials || [];
 
-  const note   = localStorage.getItem('pbf-note-' + dateStr) || '';
-  document.getElementById('dp-note').value = note;
-  const saveBtn = document.getElementById('dp-save-note');
-  saveBtn.textContent = 'Save Note';
-  saveBtn.classList.remove('saved');
-
-  const list = document.getElementById('dp-trade-list');
-  list.innerHTML = (day.trades || []).map(t => {
+  // Trade rows
+  const tradeRows = trades.map(t => {
     const p    = t.profit || 0;
-    const s    = p >= 0 ? '+$' : '-$';
     const pCls = p >= 0 ? 'pnl-pos' : 'pnl-neg';
     const dCls = (t.direction || '').toLowerCase() === 'long' ? 'dir-long' : 'dir-short';
     const time = (t.entryTime || '').split(' ').slice(1).join(' ');
@@ -467,18 +556,116 @@ function openPanel(dateStr, day) {
       <span class="${dCls}">${t.direction || '—'}</span>
       <span class="price">${t.entryPrice || '—'}</span>
       <span class="price">${t.exitPrice  || '—'}</span>
-      <span class="${pCls}">${s}${Math.abs(p).toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+      <span class="${pCls}">${p >= 0 ? '+$' : '-$'}${Math.abs(p).toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
     </div>`;
   }).join('');
 
-  document.getElementById('day-panel').classList.add('active');
-  document.getElementById('dp-overlay').classList.add('active');
+  // Firm badges
+  const firmBadges = firms.map(f => {
+    const cls = f.toLowerCase().includes('apex') ? 'apex' : f.toLowerCase().includes('take') ? 'tpt' : 'bulenox';
+    return `<span class="pbf-firm-badge ${cls}">${f}</span>`;
+  }).join('');
+
+  // Tutorial rows
+  const tutRows = tuts.map(t => `
+    <div class="pbf-tut-row">
+      <div>
+        <a href="${t.url}" target="_blank" class="pbf-tut-title">${t.title} ↗</a>
+        <div class="pbf-tut-note">${t.note}</div>
+      </div>
+    </div>`).join('');
+
+  // Faith verse
+  const verseHtml = verse ? `
+    <div class="pbf-verse-block">
+      <div class="pbf-verse-text">"${verse.text}"</div>
+      <div class="pbf-verse-ref">— ${verse.ref}</div>
+    </div>` : '';
+
+  const html = `
+  <div id="pbf-day-detail" class="pbf-day-detail">
+    <div class="pbf-dd-header">
+      <div>
+        <div class="pbf-dd-eyebrow">Session Detail</div>
+        <div class="pbf-dd-title">${label}</div>
+        ${firmBadges ? `<div class="pbf-dd-firms">${firmBadges}</div>` : ''}
+      </div>
+      <div class="pbf-dd-header-right">
+        <span class="pbf-dd-pnl ${pnlCls}">${pnlFmt}</span>
+        <button class="pbf-dd-close" onclick="closePanel()">&#x2715;</button>
+      </div>
+    </div>
+    <div class="pbf-dd-body">
+
+      <div class="pbf-dd-stats">
+        <div class="pbf-mini-stat"><div class="pbf-mini-label">trades</div><div class="pbf-mini-val">${trades.length}</div></div>
+        <div class="pbf-mini-stat"><div class="pbf-mini-label">wins</div><div class="pbf-mini-val green">${wins}</div></div>
+        <div class="pbf-mini-stat"><div class="pbf-mini-label">losses</div><div class="pbf-mini-val red">${losses}</div></div>
+        <div class="pbf-mini-stat"><div class="pbf-mini-label">win rate</div><div class="pbf-mini-val">${trades.length > 0 ? Math.round(wins/trades.length*100) : 0}%</div></div>
+      </div>
+
+      <div class="pbf-dd-section">
+        <div class="pbf-dd-section-label">Equity curve</div>
+        <div style="position:relative;width:100%;height:110px;"><canvas id="pbf-inline-equity"></canvas></div>
+      </div>
+
+      <div class="pbf-dd-section">
+        <div class="pbf-dd-section-label">Trades — ${day.count} total</div>
+        ${tradeRows || '<div style="color:var(--muted);font-size:0.85rem;padding:0.5rem 0">No trade detail available</div>'}
+      </div>
+
+      ${tuts.length ? `<div class="pbf-dd-section">
+        <div class="pbf-dd-section-label">Recommended tutorials</div>
+        ${tutRows}
+      </div>` : ''}
+
+      <div class="pbf-dd-section">
+        <div class="pbf-dd-section-label">Session notes</div>
+        <textarea class="pbf-dd-notes" id="pbf-dd-note-ta" placeholder="Add session notes...">${note}</textarea>
+        <button class="pbf-dd-save" id="pbf-dd-save-btn" onclick="saveDayNote('${dateStr}')">Save Note</button>
+      </div>
+
+      ${verseHtml}
+
+    </div>
+  </div>`;
+
+  // Insert after the calendar section
+  const calSection = document.getElementById('cal-grid').closest('section') || document.getElementById('cal-grid').parentElement;
+  calSection.insertAdjacentHTML('afterend', html);
+
+  // Build chart after DOM insertion
+  requestAnimationFrame(() => buildInlineEquityChart(trades));
+
+  // Smooth scroll to detail
+  setTimeout(() => {
+    document.getElementById('pbf-day-detail')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }, 80);
 }
 
 function closePanel() {
-  document.getElementById('day-panel').classList.remove('active');
-  document.getElementById('dp-overlay').classList.remove('active');
+  const el = document.getElementById('pbf-day-detail');
+  if (el) {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(-8px)';
+    setTimeout(() => el.remove(), 200);
+  }
+  document.querySelectorAll('.cal-cell.pbf-selected').forEach(c => c.classList.remove('pbf-selected'));
+  if (_inlineChart) { _inlineChart.destroy(); _inlineChart = null; }
   activeDate = null;
+}
+
+/* ── Save note helper (replaces inline onclick in old panel) ── */
+function saveDayNote(dateStr) {
+  const ta  = document.getElementById('pbf-dd-note-ta');
+  const btn = document.getElementById('pbf-dd-save-btn');
+  if (!ta || !btn) return;
+  const note = ta.value.trim();
+  if (note) localStorage.setItem('pbf-note-' + dateStr, note);
+  else      localStorage.removeItem('pbf-note-' + dateStr);
+  btn.textContent = '✓ Saved';
+  btn.classList.add('saved');
+  setTimeout(() => { btn.textContent = 'Save Note'; btn.classList.remove('saved'); }, 2000);
 }
 
 /* ── Event Listeners ── */
