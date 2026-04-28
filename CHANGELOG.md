@@ -2,6 +2,16 @@
 
 ---
 
+## [2026-04-27] refactor: move This Month stat cards above Monthly Detail calendar
+
+**Files changed:** `trades/index.html`
+
+- Swapped "This Month" stat cards and Monthly Detail calendar blocks
+- New order: Live Session Recap → This Month stat cards → Monthly Calendar → Performance → Yearly Calendar → Overview → Statistics
+- HTML blocks only, no IDs/classes/content changed
+
+---
+
 ## [2026-04-27] refactor: move Overview directly under Yearly Calendar
 
 **Files changed:** `trades/index.html`
