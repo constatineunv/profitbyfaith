@@ -2,6 +2,16 @@
 
 ---
 
+## [2026-04-27] refactor: move Overview directly under Yearly Calendar
+
+**Files changed:** `trades/index.html`
+
+- Swapped Global Overview and Statistics blocks — Overview now sits immediately after Yearly Calendar since clicking a year/month in the table filters the Overview cards
+- Final order: Yearly Calendar → Overview → Statistics
+- HTML blocks only, no IDs/classes/content changed
+
+---
+
 ## [2026-04-27] feat: add entry/exit time and trade drill-down to recap table
 
 **Files changed:** `trades/journal.js`, `trades/journal.css`, `trades/index.html`
