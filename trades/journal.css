@@ -989,18 +989,21 @@ body {
 .recap-firm-badge.bulenox { background: rgba(91,140,204,0.12); color: #7aaae8; border: 1px solid rgba(91,140,204,0.25); }
 .recap-trade-row {
   display: grid;
-  grid-template-columns: 28px 52px 1fr 80px 52px 72px;
+  grid-template-columns: 28px 52px 1fr 100px 80px 52px 72px;
   gap: 6px;
   padding: 6px 14px;
   font-size: 0.75rem;
   align-items: center;
   border-bottom: 1px solid rgba(255,255,255,0.04);
+  cursor: pointer;
+  transition: background var(--t);
 }
 .recap-trade-row:last-child { border-bottom: none; }
 .recap-trade-row:hover { background: rgba(255,255,255,0.02); }
+.recap-trade-row.recap-row-active { background: rgba(201,168,76,0.05); border-bottom-color: transparent; }
 .recap-col-head {
   display: grid;
-  grid-template-columns: 28px 52px 1fr 80px 52px 72px;
+  grid-template-columns: 28px 52px 1fr 100px 80px 52px 72px;
   gap: 6px;
   padding: 6px 14px;
   font-size: 0.6rem;
@@ -1009,6 +1012,58 @@ body {
   color: var(--muted);
   background: rgba(255,255,255,0.02);
   border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.recap-time-cell {
+  font-family: monospace;
+  font-size: 0.68rem;
+  color: #7a8ba8;
+  white-space: nowrap;
+}
+
+/* ── Recap trade drill-down drawer ── */
+.recap-trade-drawer {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.22s ease, opacity 0.22s ease;
+  opacity: 0;
+  background: var(--card2);
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  overflow: hidden;
+}
+.recap-trade-drawer.open {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+.rtd-inner {
+  overflow: hidden;
+  padding: 0;
+}
+.recap-trade-drawer.open .rtd-inner {
+  padding: 10px 14px 12px;
+}
+.rtd-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 8px 14px;
+}
+.rtd-field {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.rtd-label {
+  font-size: 0.58rem;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: var(--muted);
+}
+.rtd-val {
+  font-size: 0.8rem;
+  color: var(--white);
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 5px;
 }
 .recap-acct-total {
   display: flex;

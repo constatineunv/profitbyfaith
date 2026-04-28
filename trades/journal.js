@@ -228,9 +228,23 @@ function buildRecap() {
   };
   const tagClass = (p) => p > 50 ? 'good' : p < -100 ? 'bad' : 'ugly';
 
+  /* Format "4/27/2026 9:31:15 AM" → "9:31 AM" */
+  const fmtTime = (raw) => {
+    if (!raw) return '—';
+    const parts = (raw || '').split(' ');
+    if (parts.length < 2) return raw;
+    const timePart = parts[1]; // "9:31:15"
+    const ampm     = parts[2] || '';
+    const hm       = timePart.split(':').slice(0, 2).join(':');
+    return hm + (ampm ? ' ' + ampm : '');
+  };
+
   let html = `<div class="recap-col-head">
-    <span>#</span><span>dir</span><span>entry &rarr; exit</span><span>account</span><span>tag</span><span style="text-align:right">p&l</span>
+    <span>#</span><span>dir</span><span>entry &rarr; exit</span><span>time</span><span>account</span><span>tag</span><span style="text-align:right">p&l</span>
   </div>`;
+
+  // Track which recap row is currently expanded
+  let _recapOpenId = null;
 
   Object.entries(acctGroups).forEach(([acct, rows]) => {
     const acctTotal = rows.reduce((s, t) => s + (t.profit || 0), 0);
@@ -244,18 +258,39 @@ function buildRecap() {
     </div>`;
 
     rows.forEach((t, i) => {
-      const p   = t.profit || 0;
-      const dir = (t.direction || '').toLowerCase();
-      const tag = tagClass(p);
-      const ep  = t.entryPrice || '—';
-      const xp  = t.exitPrice  || '—';
-      html += `<div class="recap-trade-row">
+      const p    = t.profit || 0;
+      const dir  = (t.direction || '').toLowerCase();
+      const tag  = tagClass(p);
+      const ep   = t.entryPrice || '—';
+      const xp   = t.exitPrice  || '—';
+      const rowId = `rtr-${acct.replace(/\s+/g,'-')}-${i}`;
+      const dId   = `rtd-${acct.replace(/\s+/g,'-')}-${i}`;
+      const entT  = fmtTime(t.entryTime);
+      const extT  = fmtTime(t.exitTime);
+      const timeStr = extT !== '—' ? `${entT} – ${extT}` : entT;
+
+      html += `<div class="recap-trade-row recap-expandable" id="${rowId}" data-drawer="${dId}">
         <span style="color:#7a8ba8;font-size:0.68rem">${i + 1}</span>
         <span class="dir-badge ${dir}">${dir}</span>
         <span style="font-family:monospace;font-size:0.72rem;color:#a0a8b8">${ep} &rarr; ${xp}</span>
+        <span class="recap-time-cell">${timeStr}</span>
         <span style="font-size:0.68rem;color:#7a8ba8">${fl}</span>
         <span class="tag-badge ${tag}">${tag}</span>
         <span style="text-align:right;font-family:monospace;font-size:0.75rem;font-weight:600;color:${p >= 0 ? 'var(--win)' : 'var(--loss)'}">${p >= 0 ? '+$' : '-$'}${Math.abs(p).toFixed(2)}</span>
+      </div>
+      <div class="recap-trade-drawer" id="${dId}">
+        <div class="rtd-inner">
+          <div class="rtd-grid">
+            <div class="rtd-field"><div class="rtd-label">Entry time</div><div class="rtd-val">${t.entryTime || '—'}</div></div>
+            <div class="rtd-field"><div class="rtd-label">Exit time</div><div class="rtd-val">${t.exitTime || '—'}</div></div>
+            <div class="rtd-field"><div class="rtd-label">Direction</div><div class="rtd-val"><span class="dir-badge ${dir}">${dir}</span></div></div>
+            <div class="rtd-field"><div class="rtd-label">Price</div><div class="rtd-val" style="font-family:monospace;font-size:0.8rem;color:#a0a8b8">${ep} &rarr; ${xp}</div></div>
+            <div class="rtd-field"><div class="rtd-label">P&L</div><div class="rtd-val" style="font-weight:700;color:${p >= 0 ? 'var(--win)' : 'var(--loss)'}">${p >= 0 ? '+$' : '-$'}${Math.abs(p).toFixed(2)}</div></div>
+            <div class="rtd-field"><div class="rtd-label">Tag</div><div class="rtd-val"><span class="tag-badge ${tag}">${tag}</span></div></div>
+            <div class="rtd-field"><div class="rtd-label">Instrument</div><div class="rtd-val">${t.instrument || '—'}</div></div>
+            <div class="rtd-field"><div class="rtd-label">Account</div><div class="rtd-val"><span class="recap-firm-badge ${fc}">${badge}</span> <span style="font-size:0.72rem;color:#a0a8b8">${acct}</span></div></div>
+          </div>
+        </div>
       </div>`;
     });
 
@@ -263,7 +298,39 @@ function buildRecap() {
   });
 
   const tableEl = document.getElementById('recap-table');
-  if (tableEl) tableEl.innerHTML = html;
+  if (!tableEl) return;
+  tableEl.innerHTML = html;
+
+  // Wire up click handlers for drill-down rows
+  tableEl.querySelectorAll('.recap-expandable').forEach(row => {
+    row.addEventListener('click', () => {
+      const drawerId = row.dataset.drawer;
+      const drawer   = document.getElementById(drawerId);
+      if (!drawer) return;
+
+      const isOpen = drawer.classList.contains('open');
+
+      // Close any currently open drawer
+      if (_recapOpenId && _recapOpenId !== drawerId) {
+        const prev = document.getElementById(_recapOpenId);
+        if (prev) {
+          prev.classList.remove('open');
+          const prevRow = tableEl.querySelector(`[data-drawer="${_recapOpenId}"]`);
+          if (prevRow) prevRow.classList.remove('recap-row-active');
+        }
+      }
+
+      if (isOpen) {
+        drawer.classList.remove('open');
+        row.classList.remove('recap-row-active');
+        _recapOpenId = null;
+      } else {
+        drawer.classList.add('open');
+        row.classList.add('recap-row-active');
+        _recapOpenId = drawerId;
+      }
+    });
+  });
 }
 
 /* ── Compute stats (scoped to a date prefix, or all if prefix is null) ── */

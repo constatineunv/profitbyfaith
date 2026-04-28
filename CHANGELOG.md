@@ -2,6 +2,21 @@
 
 ---
 
+## [2026-04-27] feat: add entry/exit time and trade drill-down to recap table
+
+**Files changed:** `trades/journal.js`, `trades/journal.css`, `trades/index.html`
+
+- Added a **Time** column (entry time – exit time, HH:MM AM/PM) to every row in the Live Session Recap trade table, between the price column and the account column
+- Updated `.recap-col-head` and `.recap-trade-row` grid templates from 6 → 7 columns to accommodate the new time column
+- Each recap trade row is now **clickable** — clicking toggles an inline drill-down drawer that expands directly below the row (no modal, no side panel)
+- The drawer shows: full entry time, full exit time, direction badge, entry/exit price, P&L (colored), tag badge, instrument, and account/firm badge
+- Only one drawer is open at a time; clicking a different row collapses the previous one
+- Drawer animates in/out using CSS `grid-template-rows: 0fr → 1fr` + opacity transition, matching the `.pbf-day-detail` animation pattern
+- `functions/api/journal.js` already returns full `entryTime`/`exitTime` strings (e.g. "4/27/2026 9:31:15 AM") — confirmed no API changes needed
+- Bumped to `?v=9` to bust browser cache
+
+---
+
 ## [2026-04-27] refactor: reorder journal sections for daily trader workflow
 
 **Files changed:** `trades/index.html`
