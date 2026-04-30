@@ -223,10 +223,21 @@
 .pbfw-llbl { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: #94a; width: 78px; flex-shrink: 0; }
 .pbfw-lval { font-size: 15px; font-weight: 800; font-variant-numeric: tabular-nums; color: #fff; flex: 1; text-align: center; letter-spacing: 0.5px; }
 .pbfw-ltag { font-size: 9px; color: #666; font-style: italic; text-align: right; min-width: 70px; letter-spacing: 0.3px; text-transform: uppercase; }
+/* Entry 1 — primary action level: bright white label + larger value */
+.row-e1 .pbfw-llbl { color: #ffffff; }
+.row-e1 .pbfw-lval { color: #ffffff; font-size: 17px; }
+
+/* Entry 2 — secondary: gold */
+.row-e2 .pbfw-llbl { color: var(--pbfw-gold2); }
+.row-e2 .pbfw-lval { color: var(--pbfw-gold2); }
+
+/* Target — positive outcome: green */
 .row-tgt .pbfw-llbl, .row-tgt .pbfw-lval { color: var(--pbfw-win2); }
-.row-stp .pbfw-llbl, .row-stp .pbfw-lval { color: var(--pbfw-loss); }
-.row-e1 .pbfw-lval { color: var(--pbfw-gold2); }
-.row-e2 .pbfw-lval { color: #d4a820; }
+
+/* Stop — danger level: full red on label, value, AND tag */
+.row-stp .pbfw-llbl { color: var(--pbfw-loss); }
+.row-stp .pbfw-lval { color: var(--pbfw-loss); }
+.row-stp .pbfw-ltag { color: var(--pbfw-loss); opacity: 0.85; font-style: italic; }
 
 .pbfw-c-refgrid {
   padding: 7px 14px 9px;
@@ -406,7 +417,7 @@
         <span class="live-dot"></span>
         <span id="pbfw-eyebrow-text">PBF Trade Analyzer</span>
       </div>
-      <h2 class="pbfw-title">Signal <span>Analyzer</span></h2>
+      <h2 class="pbfw-title"><span style="color:#ffffff;">Signal</span> <span>Analyzer</span></h2>
       <div class="pbfw-tagline">Pray. Trade. Grace.</div>
     </div>
     <div class="pbfw-header-right">
@@ -476,10 +487,6 @@
       </div>
 
       <div class="pbfw-c-levels">
-        <div class="pbfw-lrow row-tgt">
-          <span class="pbfw-llbl">Target</span><span class="pbfw-lval" id="pbfw-tgt">--</span><span class="pbfw-ltag">take profit</span>
-        </div>
-        <div class="pbfw-lrow div"></div>
         <div class="pbfw-lrow row-e1">
           <span class="pbfw-llbl">Entry 1</span><span class="pbfw-lval" id="pbfw-ent1">--</span><span class="pbfw-ltag">primary</span>
         </div>
@@ -487,6 +494,9 @@
           <span class="pbfw-llbl">Entry 2</span><span class="pbfw-lval" id="pbfw-ent2">--</span><span class="pbfw-ltag">backup</span>
         </div>
         <div class="pbfw-lrow div"></div>
+        <div class="pbfw-lrow row-tgt">
+          <span class="pbfw-llbl">Target</span><span class="pbfw-lval" id="pbfw-tgt">--</span><span class="pbfw-ltag">take profit</span>
+        </div>
         <div class="pbfw-lrow row-stp">
           <span class="pbfw-llbl">Stop</span><span class="pbfw-lval" id="pbfw-stp">--</span><span class="pbfw-ltag">invalidation</span>
         </div>
