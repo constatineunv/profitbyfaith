@@ -12,6 +12,324 @@
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet" />
   <link rel="canonical" href="https://profitbyfaith.com/trades/" />
   <link rel="stylesheet" href="journal.css?v=9" />
+<style>
+/*
+  TRADES PAGE — PBF ANALYZER WIDGET SECTION
+  Paste into trades/journal.css or inline in trades/index.html
+  Uses your existing CSS variables: --gold, --win, --loss, --card, --muted, --text
+  Fallbacks defined below for standalone preview.
+*/
+
+:root {
+  --pbfw-black:   #070a0f;
+  --pbfw-navy:    #0d1526;
+  --pbfw-navy2:   #131c33;
+  --pbfw-gold:    var(--gold, #c9a84c);
+  --pbfw-gold2:   #e8c84a;
+  --pbfw-goldbr:  #ffd700;
+  --pbfw-win:     var(--win, #2dd4bf);
+  --pbfw-win2:    #00e676;
+  --pbfw-loss:    var(--loss, #f87171);
+  --pbfw-muted:   var(--muted, #6b7587);
+  --pbfw-line:    #1e2a48;
+  --pbfw-card:    var(--card, #131c33);
+}
+
+/* ── Section container ── */
+#pbf-analyzer-widget-section {
+  padding: 2.5rem 0 2rem;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  margin-bottom: 2rem;
+}
+
+.pbfw-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.pbfw-eyebrow {
+  font-size: 0.65rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--pbfw-muted);
+  margin-bottom: 4px;
+  display: flex; align-items: center; gap: 8px;
+}
+.pbfw-eyebrow .live-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--pbfw-win2); box-shadow: 0 0 7px var(--pbfw-win2);
+  display: none;
+  animation: pbfwPulse 1.3s infinite;
+}
+.pbfw-eyebrow.is-live .live-dot { display: inline-block; }
+
+.pbfw-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+  font-weight: 900; letter-spacing: 1.5px;
+  color: var(--text, #f0f4ff);
+  margin: 0; border: none; padding: 0;
+}
+.pbfw-title::before { display: none; }
+.pbfw-title span { color: var(--pbfw-gold2); }
+
+.pbfw-tagline {
+  font-size: 0.78rem; font-style: italic;
+  color: var(--pbfw-gold); opacity: 0.75;
+  margin-top: 2px;
+}
+
+.pbfw-header-right {
+  text-align: right;
+}
+.pbfw-market-pill {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 4px 11px; border-radius: 999px;
+  font-size: 10px; font-weight: 800; letter-spacing: 1.5px;
+  background: rgba(40,44,60,0.7);
+  border: 1px solid var(--pbfw-line); color: #cfd4e0;
+  text-transform: uppercase;
+}
+.pbfw-market-pill .d { width:7px;height:7px;border-radius:50%;background:#555; }
+.pbfw-clock {
+  font-size: 11px; color: var(--pbfw-muted); font-weight: 600;
+  letter-spacing: 0.5px; margin-top: 4px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Two column layout ── */
+.pbfw-layout {
+  display: grid;
+  grid-template-columns: 460px 1fr;
+  gap: 24px;
+  align-items: start;
+}
+@media (max-width: 1000px) { .pbfw-layout { grid-template-columns: 1fr; } }
+
+/* ── Left: Full analyzer card ── */
+.pbfw-card {
+  width: 100%;
+  background: linear-gradient(180deg, rgba(13,21,38,0.97) 0%, rgba(7,10,15,0.98) 100%);
+  border: 2px solid var(--pbfw-gold);
+  border-radius: 12px;
+  overflow: hidden;
+  color: #fff;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.5), inset 0 1px 0 rgba(212,175,55,0.18);
+  transition: border-color 0.4s ease, box-shadow 0.4s ease;
+}
+.pbfw-card.active-long  { border-color: var(--pbfw-win2); box-shadow: 0 0 28px rgba(0,230,118,0.28), inset 0 1px 0 rgba(0,230,118,0.18); }
+.pbfw-card.active-short { border-color: var(--pbfw-loss); box-shadow: 0 0 28px rgba(248,113,113,0.28), inset 0 1px 0 rgba(248,113,113,0.18); }
+.pbfw-card.approaching  { border-color: var(--pbfw-goldbr); animation: pbfwGlow 1.6s infinite; }
+
+@keyframes pbfwGlow {
+  0%,100% { box-shadow: 0 0 22px rgba(255,215,0,0.30); }
+  50%      { box-shadow: 0 0 32px rgba(255,215,0,0.55); }
+}
+
+/* Card sections */
+.pbfw-c-header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 10px 14px;
+  background: rgba(7,10,15,0.92);
+  border-bottom: 1px solid rgba(201,168,76,0.35);
+  position: relative;
+}
+.pbfw-c-header::after {
+  content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--pbfw-gold), transparent);
+  opacity: 0.6;
+}
+.pbfw-c-brand {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 18px; font-weight: 800; color: var(--pbfw-gold2);
+  letter-spacing: 1.5px; line-height: 1;
+}
+.pbfw-c-tagline { font-size: 9.5px; color: #aab; letter-spacing: 1.2px; text-transform: uppercase; margin-top: 2px; }
+
+.pbfw-c-pill {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 3px 9px; border-radius: 999px;
+  font-size: 9px; font-weight: 800; letter-spacing: 1.5px;
+  background: rgba(40,44,60,0.7); border: 1px solid var(--pbfw-line); color: #cfd4e0;
+  text-transform: uppercase;
+}
+.pbfw-c-pill .d { width:7px;height:7px;border-radius:50%;background:#555; }
+.pbfw-c-clock { font-size: 10px; color: #aaa; font-weight: 600; margin-top: 3px; font-variant-numeric: tabular-nums; }
+
+.pbfw-c-price {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 9px 14px 7px;
+  background: rgba(7,10,15,0.55); border-bottom: 1px solid var(--pbfw-line);
+}
+.pbfw-price-num {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 28px; font-weight: 700; color: #fff;
+  font-variant-numeric: tabular-nums; line-height: 1.05;
+  transition: color 0.25s;
+}
+.pbfw-price-num.up   { color: var(--pbfw-win2); text-shadow: 0 0 12px rgba(0,230,118,0.4); }
+.pbfw-price-num.down { color: var(--pbfw-loss); text-shadow: 0 0 12px rgba(255,82,82,0.4); }
+.pbfw-price-lbl { font-size: 9px; color: #777; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; }
+
+.pbfw-c-opp {
+  padding: 11px 14px 8px; text-align: center; border-bottom: 1px solid var(--pbfw-line);
+}
+.pbfw-opp-state {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 14px; font-weight: 700; letter-spacing: 4px; text-transform: uppercase;
+  color: var(--pbfw-gold2); margin-bottom: 5px;
+}
+.pbfw-signal-row { display: flex; align-items: center; justify-content: center; gap: 12px; }
+.pbfw-signal-badge {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 44px; font-weight: 900; letter-spacing: 4px; line-height: 0.95;
+  color: var(--pbfw-muted);
+  transition: color 0.3s, text-shadow 0.3s;
+}
+.pbfw-signal-badge.long  { color: var(--pbfw-win2); text-shadow: 0 0 24px rgba(0,230,118,0.7); }
+.pbfw-signal-badge.short { color: var(--pbfw-loss); text-shadow: 0 0 24px rgba(255,82,82,0.7); }
+.pbfw-signal-meta { display: flex; flex-direction: column; gap: 4px; }
+.pbfw-strat-badge {
+  font-size: 10px; font-weight: 800; padding: 3px 10px;
+  border-radius: 4px; letter-spacing: 1.5px;
+  background: rgba(13,21,38,0.85); color: var(--pbfw-gold2);
+  border: 1px solid var(--pbfw-gold); text-transform: uppercase;
+}
+.pbfw-strength-badge {
+  font-size: 10px; font-weight: 800; padding: 2px 8px;
+  border-radius: 4px; letter-spacing: 1px;
+  background: rgba(20,28,50,0.7); color: #c0c8d8;
+  border: 1px solid var(--pbfw-line); text-transform: uppercase;
+}
+.pbfw-strength-badge.strong   { color: var(--pbfw-win2);  border-color: rgba(0,230,118,0.5);  background: rgba(0,40,16,0.45); }
+.pbfw-strength-badge.moderate { color: var(--pbfw-gold2); border-color: rgba(201,168,76,0.5); background: rgba(60,45,0,0.35); }
+.pbfw-strength-badge.weak     { color: #999; }
+
+.pbfw-c-score { padding: 9px 14px 8px; }
+.pbfw-score-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 5px; }
+.pbfw-score-label { font-size: 10px; color: #aaa; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; }
+.pbfw-score-num { font-family: 'Bebas Neue', sans-serif; font-size: 16px; color: var(--pbfw-gold2); font-weight: 700; font-variant-numeric: tabular-nums; }
+.pbfw-track { width: 100%; height: 6px; background: rgba(20,28,50,0.85); border-radius: 4px; overflow: hidden; }
+.pbfw-fill { height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--pbfw-gold), var(--pbfw-goldbr)); transition: width 0.5s cubic-bezier(0.2,0.8,0.4,1); box-shadow: 0 0 10px rgba(255,215,0,0.4); }
+
+.pbfw-c-levels { padding: 7px 14px 8px; display: flex; flex-direction: column; gap: 1px; }
+.pbfw-lrow { display: flex; align-items: center; justify-content: space-between; padding: 3px 0; }
+.pbfw-lrow.div { border-top: 1px dashed var(--pbfw-line); margin: 3px 0; padding: 0; }
+.pbfw-llbl { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: #94a; width: 78px; flex-shrink: 0; }
+.pbfw-lval { font-size: 15px; font-weight: 800; font-variant-numeric: tabular-nums; color: #fff; flex: 1; text-align: center; letter-spacing: 0.5px; }
+.pbfw-ltag { font-size: 9px; color: #666; font-style: italic; text-align: right; min-width: 70px; letter-spacing: 0.3px; text-transform: uppercase; }
+.row-tgt .pbfw-llbl, .row-tgt .pbfw-lval { color: var(--pbfw-win2); }
+.row-stp .pbfw-llbl, .row-stp .pbfw-lval { color: var(--pbfw-loss); }
+.row-e1 .pbfw-lval { color: var(--pbfw-gold2); }
+.row-e2 .pbfw-lval { color: #d4a820; }
+
+.pbfw-c-refgrid {
+  padding: 7px 14px 9px;
+  border-top: 1px solid var(--pbfw-line);
+  background: rgba(7,10,15,0.4);
+}
+.pbfw-ref-title { font-size: 9px; font-weight: 800; color: #777; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 6px; }
+.pbfw-ref-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 3px 10px; }
+.pbfw-ref-cell { display: flex; flex-direction: column; gap: 1px; }
+.pbfw-ref-key { font-size: 8.5px; color: #666; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; }
+.pbfw-ref-val { font-size: 11.5px; color: #d8e0f0; font-weight: 700; font-variant-numeric: tabular-nums; }
+.pbfw-ref-val.bull { color: var(--pbfw-win2); }
+.pbfw-ref-val.bear { color: var(--pbfw-loss); }
+.pbfw-ref-val.dim  { color: #444; font-style: italic; }
+
+.pbfw-c-analysis {
+  padding: 8px 14px; font-size: 11.5px; color: #d8dde8;
+  line-height: 1.55; font-weight: 500; border-top: 1px solid var(--pbfw-line);
+  background: rgba(7,10,15,0.55); min-height: 36px;
+}
+.pbfw-c-conflict {
+  display: none; padding: 6px 14px;
+  background: linear-gradient(180deg, #b80000, #800000);
+  color: #fff; font-size: 11px; font-weight: 800; line-height: 1.4;
+  border-top: 1px solid rgba(255,100,100,0.5);
+}
+.pbfw-c-conflict.visible { display: block; }
+.pbfw-c-conflict::before { content: '⚠ '; font-size: 12px; }
+
+.pbfw-c-verse {
+  padding: 7px 14px 8px; border-top: 1px solid var(--pbfw-line);
+  display: flex; align-items: flex-start; gap: 8px;
+  background: rgba(7,10,15,0.55);
+  font-size: 13px; color: var(--pbfw-gold2); font-style: italic; line-height: 1.5; flex: 1;
+}
+.pbfw-c-verse-icon { color: var(--pbfw-gold); font-size: 15px; flex-shrink: 0; margin-top: 1px; }
+.pbfw-verse-ref { font-style: normal; font-weight: 700; color: var(--pbfw-goldbr); white-space: nowrap; margin-left: 4px; }
+
+.pbfw-c-footer {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 6px 14px;
+  background: rgba(7,10,15,0.92); border-top: 1px solid rgba(201,168,76,0.25);
+  font-size: 9.5px; color: #777; letter-spacing: 0.5px;
+}
+.pbfw-conn-dot {
+  width: 7px; height: 7px; border-radius: 50%; background: #555;
+  display: inline-block; margin-right: 5px; vertical-align: middle;
+}
+.pbfw-conn-dot.live { background: var(--pbfw-win2); box-shadow: 0 0 6px var(--pbfw-win2); }
+.pbfw-conn-dot.wait { background: var(--pbfw-gold); animation: pbfwPulse 1.6s infinite; }
+
+/* Closed state */
+.pbfw-closed-panel {
+  display: none; padding: 20px 14px;
+  text-align: center; border-top: 1px solid var(--pbfw-line);
+  background: rgba(7,10,15,0.4);
+}
+.pbfw-closed-panel.visible { display: block; }
+.pbfw-closed-label { font-family:'Bebas Neue',sans-serif; font-size:22px; letter-spacing:4px; color:var(--pbfw-gold2); margin-bottom:4px; }
+.pbfw-closed-sub { font-size:10.5px; color:#889; font-style:italic; letter-spacing:0.5px; }
+.pbfw-countdown { font-size:13px; color:#d8e0f0; font-weight:700; margin-top:6px; font-variant-numeric:tabular-nums; letter-spacing:1px; }
+
+/* ── Right: Info panels ── */
+.pbfw-info-col { display: flex; flex-direction: column; gap: 16px; }
+
+.pbfw-info-card {
+  background: var(--pbfw-card);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 10px; padding: 1rem 1.25rem;
+  overflow: hidden;
+}
+.pbfw-info-card h3 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 14px; letter-spacing: 2px; color: var(--pbfw-gold);
+  text-transform: uppercase; margin: 0 0 10px;
+}
+
+/* Strategy guide */
+.pbfw-strat-steps { display: flex; flex-direction: column; gap: 8px; }
+.pbfw-step { display: flex; gap: 10px; align-items: flex-start; font-size: 13px; color: var(--text,#d0daf0); line-height: 1.4; }
+.pbfw-step-num { font-family:'Bebas Neue',sans-serif; font-size:18px; color:var(--pbfw-gold2); min-width:20px; line-height:1; }
+
+/* Score legend */
+.pbfw-score-legend { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.pbfw-legend-item { display: flex; flex-direction: column; gap: 2px; }
+.pbfw-legend-label { font-size: 11px; color: var(--pbfw-muted); font-weight: 700; letter-spacing: 1px; text-transform: uppercase; }
+.pbfw-legend-desc { font-size: 12px; color: var(--text,#c0cad8); }
+
+/* Sponsor strip */
+.pbfw-sponsor-strip { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.pbfw-sponsor-chip {
+  font-size: 10px; font-weight: 800; letter-spacing: 1px;
+  padding: 4px 10px; border-radius: 4px;
+  border: 1px solid rgba(201,168,76,0.3); color: var(--pbfw-gold);
+  background: rgba(201,168,76,0.06);
+  text-transform: uppercase;
+}
+
+@keyframes pbfwPulse { 0%,100%{opacity:1;} 50%{opacity:0.25;} }
+
+/* Override: trades page dark background assumed */
+#pbf-analyzer-widget-section * { box-sizing: border-box; }
+</style>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body>
@@ -92,6 +410,207 @@
     </div>
 
   </div>
+</div>
+
+<!-- PBF SIGNAL ANALYZER WIDGET -->
+<div class="wrap">
+<section id="pbf-analyzer-widget-section">
+
+  <!-- Section header -->
+  <div class="pbfw-header">
+    <div>
+      <div class="pbfw-eyebrow" id="pbfw-eyebrow">
+        <span class="live-dot"></span>
+        <span id="pbfw-eyebrow-text">PBF Trade Analyzer</span>
+      </div>
+      <h2 class="pbfw-title">Signal <span>Analyzer</span></h2>
+      <div class="pbfw-tagline">Pray. Trade. Grace.</div>
+    </div>
+    <div class="pbfw-header-right">
+      <span class="pbfw-market-pill" id="pbfw-market-pill">
+        <span class="d" id="pbfw-pill-dot"></span>
+        <span id="pbfw-pill-text">CLOSED</span>
+      </span>
+      <div class="pbfw-clock" id="pbfw-clock">--:--:-- ET</div>
+    </div>
+  </div>
+
+  <!-- Two-col layout -->
+  <div class="pbfw-layout">
+
+    <!-- Left: full analyzer card -->
+    <div class="pbfw-card" id="pbfw-card">
+
+      <div class="pbfw-c-header">
+        <div>
+          <img src="https://profitbyfaith.com/assets/PBF-LOGO-MAIN.jpg" alt="PBF" style="height:36px;width:auto;object-fit:contain;filter:drop-shadow(0 0 4px rgba(201,168,76,0.35));vertical-align:middle;margin-right:9px;">
+          <span>
+            <div class="pbfw-c-brand" style="display:inline;vertical-align:middle;">ProfitByFaith</div>
+          </span>
+          <div class="pbfw-c-tagline">Pray · Trade · Grow</div>
+        </div>
+        <div style="text-align:right;">
+          <span class="pbfw-c-pill" id="pbfw-c-pill">
+            <span class="d" id="pbfw-c-pill-dot"></span>
+            <span id="pbfw-c-pill-text">CLOSED</span>
+          </span>
+          <div class="pbfw-c-clock" id="pbfw-c-clock">--:--:-- ET</div>
+        </div>
+      </div>
+
+      <div class="pbfw-c-price">
+        <div>
+          <div class="pbfw-price-lbl">NQ Price</div>
+          <div class="pbfw-price-num" id="pbfw-price">--</div>
+        </div>
+        <div style="text-align:right;">
+          <div class="pbfw-price-lbl">Chart</div>
+          <div style="font-size:16px;font-weight:800;color:var(--pbfw-gold2);font-variant-numeric:tabular-nums;line-height:1.05;margin-top:2px;" id="pbfw-interval">--</div>
+        </div>
+      </div>
+
+      <div class="pbfw-c-opp">
+        <div class="pbfw-opp-state" id="pbfw-opp-state"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:currentColor;vertical-align:middle;margin-right:7px;animation:pbfwPulse 1.4s infinite;"></span><span id="pbfw-opp-text">WAITING FOR ORB</span></div>
+        <div class="pbfw-signal-row">
+          <div class="pbfw-signal-badge" id="pbfw-sig">--</div>
+          <div class="pbfw-signal-meta">
+            <span class="pbfw-strat-badge" id="pbfw-strat">--</span>
+            <span class="pbfw-strength-badge" id="pbfw-strength">--</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="pbfw-c-score">
+        <div class="pbfw-score-row">
+          <span class="pbfw-score-label">Confluence Score</span>
+          <span class="pbfw-score-num" id="pbfw-score">0 <span style="color:#555;font-size:10px;">/ 100</span></span>
+        </div>
+        <div class="pbfw-track"><div class="pbfw-fill" id="pbfw-fill" style="width:0%"></div></div>
+        <div style="display:flex;justify-content:flex-end;margin-top:5px;gap:6px;align-items:baseline;">
+          <span style="font-size:9px;color:#777;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;">Win Prob</span>
+          <span style="font-family:'Bebas Neue',sans-serif;font-size:14px;color:var(--pbfw-gold2);font-weight:700;" id="pbfw-prob">~--%</span>
+        </div>
+      </div>
+
+      <div class="pbfw-c-levels">
+        <div class="pbfw-lrow row-tgt">
+          <span class="pbfw-llbl">Target</span><span class="pbfw-lval" id="pbfw-tgt">--</span><span class="pbfw-ltag">take profit</span>
+        </div>
+        <div class="pbfw-lrow div"></div>
+        <div class="pbfw-lrow row-e1">
+          <span class="pbfw-llbl">Entry 1</span><span class="pbfw-lval" id="pbfw-ent1">--</span><span class="pbfw-ltag">primary</span>
+        </div>
+        <div class="pbfw-lrow row-e2">
+          <span class="pbfw-llbl">Entry 2</span><span class="pbfw-lval" id="pbfw-ent2">--</span><span class="pbfw-ltag">backup</span>
+        </div>
+        <div class="pbfw-lrow div"></div>
+        <div class="pbfw-lrow row-stp">
+          <span class="pbfw-llbl">Stop</span><span class="pbfw-lval" id="pbfw-stp">--</span><span class="pbfw-ltag">invalidation</span>
+        </div>
+      </div>
+
+      <div class="pbfw-c-refgrid">
+        <div class="pbfw-ref-title">Reference Levels</div>
+        <div class="pbfw-ref-grid">
+          <div class="pbfw-ref-cell"><span class="pbfw-ref-key">ORB H</span><span class="pbfw-ref-val" id="rfw-orbh">--</span></div>
+          <div class="pbfw-ref-cell"><span class="pbfw-ref-key">VWAP</span><span class="pbfw-ref-val" id="rfw-vwap">--</span></div>
+          <div class="pbfw-ref-cell"><span class="pbfw-ref-key">EMA 200</span><span class="pbfw-ref-val" id="rfw-ema">--</span></div>
+          <div class="pbfw-ref-cell"><span class="pbfw-ref-key">ORB L</span><span class="pbfw-ref-val" id="rfw-orbl">--</span></div>
+          <div class="pbfw-ref-cell"><span class="pbfw-ref-key">POC</span><span class="pbfw-ref-val" id="rfw-poc">--</span></div>
+          <div class="pbfw-ref-cell"><span class="pbfw-ref-key">ATR</span><span class="pbfw-ref-val" id="rfw-atr">--</span></div>
+          <div class="pbfw-ref-cell"><span class="pbfw-ref-key">VAH</span><span class="pbfw-ref-val" id="rfw-vah">--</span></div>
+          <div class="pbfw-ref-cell"><span class="pbfw-ref-key">VAL</span><span class="pbfw-ref-val" id="rfw-val">--</span></div>
+          <div class="pbfw-ref-cell"><span class="pbfw-ref-key">PDH/PDL</span><span class="pbfw-ref-val" id="rfw-pd">--</span></div>
+        </div>
+      </div>
+
+      <div class="pbfw-c-analysis" id="pbfw-analysis">Connecting to PBF Signal Analyzer...</div>
+
+      <div class="pbfw-c-conflict" id="pbfw-conflict">
+        <span id="pbfw-conflict-text"></span>
+      </div>
+
+      <div class="pbfw-closed-panel" id="pbfw-closed">
+        <div class="pbfw-closed-label" id="pbfw-closed-label">MARKET CLOSED</div>
+        <div class="pbfw-closed-sub" id="pbfw-closed-sub">Pray · Plan · Prepare</div>
+        <div class="pbfw-countdown" id="pbfw-countdown"></div>
+      </div>
+
+      <div class="pbfw-c-verse">
+        <span class="pbfw-c-verse-icon">✝</span>
+        <span id="pbfw-verse-text"></span>
+      </div>
+
+      <div class="pbfw-c-footer">
+        <span><span class="pbfw-conn-dot wait" id="pbfw-conn-dot"></span><span id="pbfw-conn-status">Waiting for server...</span></span>
+        <span id="pbfw-ts">--</span>
+      </div>
+    </div>
+
+    <!-- Right: info panels -->
+    <div class="pbfw-info-col">
+
+      <div class="pbfw-info-card">
+        <h3>How the Analyzer Works</h3>
+        <div class="pbfw-strat-steps">
+          <div class="pbfw-step"><span class="pbfw-step-num">1</span><span>NinjaTrader 8 builds the <strong>15-Minute Opening Range</strong> (9:30–9:45 ET) and locks ORB High/Low.</span></div>
+          <div class="pbfw-step"><span class="pbfw-step-num">2</span><span><strong>EMA 200 bias</strong> filters direction — only long setups above, short below.</span></div>
+          <div class="pbfw-step"><span class="pbfw-step-num">3</span><span><strong>Volume Profile</strong> levels (VAH, VAL, POC) confirm confluence — rejections and bounces add score.</span></div>
+          <div class="pbfw-step"><span class="pbfw-step-num">4</span><span>On breakout, the analyzer publishes <strong>Entry, Stop, Target</strong> and a 0–100 confluence score in real-time.</span></div>
+          <div class="pbfw-step"><span class="pbfw-step-num">5</span><span>If signal conflicts with VP structure, a <strong>Conflict Warning</strong> fires — trade is flagged, not taken.</span></div>
+        </div>
+      </div>
+
+      <div class="pbfw-info-card">
+        <h3>Confluence Score Key</h3>
+        <div class="pbfw-score-legend">
+          <div class="pbfw-legend-item">
+            <span class="pbfw-legend-label" style="color:#00e676;">80–100 Strong</span>
+            <span class="pbfw-legend-desc">High conviction — multiple VP levels + EMA aligned</span>
+          </div>
+          <div class="pbfw-legend-item">
+            <span class="pbfw-legend-label" style="color:#e8c84a;">60–79 Moderate</span>
+            <span class="pbfw-legend-desc">Solid setup — 2+ factors confirm direction</span>
+          </div>
+          <div class="pbfw-legend-item">
+            <span class="pbfw-legend-label" style="color:#9d7dff;">40–59 Weak</span>
+            <span class="pbfw-legend-desc">Reduced size or skip — conflicting signals</span>
+          </div>
+          <div class="pbfw-legend-item">
+            <span class="pbfw-legend-label" style="color:#888;">0–39 No Trade</span>
+            <span class="pbfw-legend-desc">Against VP structure — wait for better setup</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="pbfw-info-card">
+        <h3>Prop Firm Accounts</h3>
+        <div style="font-size:13px;color:var(--text,#c0cad8);margin-bottom:10px;line-height:1.5;">
+          Ryan trades two <strong>50K Apex</strong> evaluation accounts simultaneously, manually mirrored. Every signal you see here is being executed live.
+        </div>
+        <div class="pbfw-sponsor-strip">
+          <span class="pbfw-sponsor-chip">Apex Trader Funding</span>
+          <span class="pbfw-sponsor-chip">Tradeify</span>
+          <span class="pbfw-sponsor-chip">TakeProfitTrader</span>
+          <span class="pbfw-sponsor-chip">TradeDay</span>
+        </div>
+      </div>
+
+      <div class="pbfw-info-card" style="border-color:rgba(201,168,76,0.25);background:linear-gradient(135deg,rgba(13,21,38,0.9),rgba(7,10,15,0.95));">
+        <h3 style="color:var(--pbfw-gold2);">Watch It Live</h3>
+        <div style="font-size:13px;color:#8899bb;line-height:1.6;margin-bottom:14px;">
+          Join Ryan every weekday morning at <strong style="color:#d0daf0;">9:30 AM ET</strong> on YouTube. Watch the analyzer fire signals in real-time as the ORB forms.
+        </div>
+        <a href="https://www.youtube.com/@bullionaireDT" target="_blank" style="display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#c9a84c,#e8c84a);color:#060a10;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:800;padding:10px 20px;border-radius:7px;text-decoration:none;letter-spacing:0.5px;transition:transform 0.15s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
+          <span style="width:18px;height:18px;background:#060a10;border-radius:3px;display:flex;align-items:center;justify-content:center;"><span style="border-style:solid;border-width:4.5px 0 4.5px 8px;border-color:transparent transparent transparent #e8c84a;margin-left:2px;"></span></span>
+          @bullionaireDT on YouTube
+        </a>
+      </div>
+
+    </div>
+  </div>
+
+</section>
 </div>
 
 <!-- MONTHLY CALENDAR -->
@@ -272,5 +791,234 @@
 </footer>
 
 <script src="journal.js?v=9"></script>
+
+<script>
+/* ══════════════════════════════════════════
+   PBF ANALYZER — TRADES PAGE SCRIPT
+   ══════════════════════════════════════════ */
+
+const PBFW_SIGNAL_URL = 'http://localhost:8080/signal';
+
+const PBFW_VERSES = [
+  { text: 'Commit to the Lord whatever you do, and he will establish your plans.', ref: 'Prov 16:3' },
+  { text: 'The plans of the diligent lead to profit as surely as haste leads to poverty.', ref: 'Prov 21:5' },
+  { text: 'I can do all things through Christ who strengthens me.', ref: 'Phil 4:13' },
+  { text: 'Trust in the Lord with all your heart and lean not on your own understanding.', ref: 'Prov 3:5' },
+  { text: 'For I know the plans I have for you — plans to prosper you and not to harm you.', ref: 'Jer 29:11' },
+  { text: 'Be strong and courageous. Do not be afraid; do not be discouraged.', ref: 'Josh 1:9' },
+  { text: 'Whatever you do, work at it with all your heart, as working for the Lord.', ref: 'Col 3:23' },
+  { text: 'Seek first his kingdom and his righteousness, and all these things will be given to you.', ref: 'Matt 6:33' },
+  { text: 'In all things God works for the good of those who love him.', ref: 'Rom 8:28' },
+  { text: 'Be still, and know that I am God.', ref: 'Ps 46:10' }
+];
+
+let pbfwVi = Math.floor(Math.random() * PBFW_VERSES.length);
+let pbfwLastPrice = null;
+
+function pbfwEl(id) { return document.getElementById(id); }
+
+function pbfwFmt(v) {
+  const n = parseFloat(v);
+  return (!v || isNaN(n) || n === 0) ? '--' : n.toFixed(2);
+}
+
+function pbfwNowET() {
+  return new Date(new Date().toLocaleString('en-US', { timeZone: 'America/New_York' }));
+}
+
+function pbfwMarketState(d) {
+  const dow = d.getDay();
+  if (dow === 0 || dow === 6) return 'WEEKEND';
+  const m = d.getHours() * 60 + d.getMinutes();
+  if (m >= 240 && m < 570)  return 'PRE';
+  if (m >= 570 && m <= 960) return 'OPEN';
+  if (m > 960 && m < 1200)  return 'AFTER';
+  return 'CLOSED';
+}
+
+function pbfwFmtClock(d) {
+  return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')+':'+String(d.getSeconds()).padStart(2,'0')+' ET';
+}
+
+function pbfwNextOpen(d) {
+  const n = new Date(d); n.setHours(9,30,0,0);
+  if (d.getHours() > 9 || (d.getHours() === 9 && d.getMinutes() >= 30)) n.setDate(n.getDate()+1);
+  while (n.getDay() === 0 || n.getDay() === 6) n.setDate(n.getDate()+1);
+  return n;
+}
+function pbfwFmtCountdown(ms) {
+  if (ms <= 0) return '00:00:00';
+  const s = Math.floor(ms/1000), h = Math.floor(s/3600), m = Math.floor((s%3600)/60), ss = s%60;
+  return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(ss).padStart(2,'0');
+}
+
+function pbfwTickClock() {
+  const d = pbfwNowET();
+  const ck = pbfwFmtClock(d);
+  ['pbfw-clock','pbfw-c-clock'].forEach(id => { const el=pbfwEl(id); if(el) el.textContent=ck; });
+
+  const st = pbfwMarketState(d);
+  const pillMap = {
+    'OPEN':    { text:'MARKET OPEN',  dot:'#00e676', glow:'0 0 8px #00e676' },
+    'PRE':     { text:'PRE-MARKET',   dot:'#ffc850', glow:'0 0 6px #ffc850' },
+    'AFTER':   { text:'AFTER HOURS',  dot:'#9d7dff', glow:'0 0 6px #9d7dff' },
+    'CLOSED':  { text:'CLOSED',       dot:'#888',    glow:'none' },
+    'WEEKEND': { text:'WEEKEND',      dot:'#888',    glow:'none' }
+  }[st] || {};
+
+  ['pbfw-pill-dot','pbfw-c-pill-dot'].forEach(id => {
+    const el=pbfwEl(id);
+    if(el) { el.style.background=pillMap.dot||'#888'; el.style.boxShadow=pillMap.glow!=='none'?pillMap.glow:'none'; }
+  });
+  ['pbfw-pill-text','pbfw-c-pill-text'].forEach(id => { const el=pbfwEl(id); if(el) el.textContent=pillMap.text||'--'; });
+
+  // Closed panel
+  const cp = pbfwEl('pbfw-closed');
+  if (!cp) return;
+  if (st === 'CLOSED' || st === 'WEEKEND' || st === 'AFTER') {
+    cp.classList.add('visible');
+    const lbl = pbfwEl('pbfw-closed-label');
+    const sub = pbfwEl('pbfw-closed-sub');
+    const cd  = pbfwEl('pbfw-countdown');
+    if (lbl) lbl.textContent = st === 'WEEKEND' ? 'MARKET CLOSED · WEEKEND' : st === 'AFTER' ? 'AFTER HOURS' : 'MARKET CLOSED';
+    if (sub) sub.textContent = st === 'WEEKEND' ? 'Rest in His grace · See you Monday' : st === 'AFTER' ? 'Session complete · Review · Reset' : 'Pray · Plan · Prepare';
+    if (cd)  cd.textContent  = 'Next open in ' + pbfwFmtCountdown(pbfwNextOpen(d) - d);
+  } else {
+    cp.classList.remove('visible');
+  }
+}
+setInterval(pbfwTickClock, 1000);
+pbfwTickClock();
+
+// Verse rotation
+function pbfwShowVerse() {
+  const v = PBFW_VERSES[pbfwVi];
+  const el = pbfwEl('pbfw-verse-text');
+  if (el) el.innerHTML = '"' + v.text + '" <span class="pbfw-verse-ref">— ' + v.ref + '</span>';
+}
+pbfwShowVerse();
+setInterval(() => { pbfwVi = (pbfwVi+1) % PBFW_VERSES.length; pbfwShowVerse(); }, 12000);
+
+// Signal poll
+async function pbfwPoll() {
+  try {
+    const r = await fetch(PBFW_SIGNAL_URL, { cache:'no-store', signal: AbortSignal.timeout ? AbortSignal.timeout(3000) : undefined });
+    if (!r.ok) throw new Error('bad');
+    pbfwApply(await r.json());
+  } catch(_) {
+    pbfwOffline();
+  }
+}
+
+function pbfwApply(d) {
+  const dir   = (d.direction || '').toUpperCase();
+  const score = Math.max(0, Math.min(100, d.score || 0));
+  const opp   = (d.opp_state || 'WAITING').toUpperCase();
+  const strat = (d.strategy  || '--').toUpperCase().replace(/-/g,' ');
+  const str   = (d.strength  || '--').toUpperCase();
+
+  // Card state
+  const card = pbfwEl('pbfw-card');
+  if (card) {
+    card.className = 'pbfw-card';
+    if (opp === 'ACTIVE' || opp === 'APPROACHING') {
+      card.classList.add(dir === 'SELL' ? 'active-short' : 'active-long');
+    }
+    if (opp === 'APPROACHING') card.classList.add('approaching');
+  }
+
+  // Signal badge
+  const sig = pbfwEl('pbfw-sig');
+  if (sig) {
+    sig.textContent = dir === 'SELL' ? 'SHORT' : (dir === 'BUY' ? 'LONG' : '--');
+    sig.className   = 'pbfw-signal-badge ' + (dir === 'SELL' ? 'short' : dir === 'BUY' ? 'long' : '');
+  }
+
+  // Opp state
+  const oppEl = pbfwEl('pbfw-opp-text');
+  if (oppEl) oppEl.textContent = {
+    'WAITING':'WAITING FOR ORB','WATCHING':'WATCHING FOR BREAK',
+    'APPROACHING':'APPROACHING LEVEL','ACTIVE':'TRADE ACTIVE',
+    'HIT':'TARGET HIT','STOPPED':'STOPPED OUT','PASSED':'OPPORTUNITY PASSED'
+  }[opp] || opp;
+
+  pbfwEl('pbfw-strat').textContent  = strat || '--';
+  const sEl = pbfwEl('pbfw-strength');
+  if (sEl) { sEl.textContent = str; sEl.className='pbfw-strength-badge '+(str==='STRONG'?'strong':str==='MODERATE'?'moderate':'weak'); }
+
+  pbfwEl('pbfw-score').innerHTML = score + ' <span style="color:#555;font-size:10px;">/ 100</span>';
+  pbfwEl('pbfw-fill').style.width = score + '%';
+  pbfwEl('pbfw-prob').textContent = '~' + Math.min(99,Math.max(0,Math.round(score*0.72+8))) + '%';
+
+  // Price
+  const rawP = d.price ?? d.currentPrice ?? d.close;
+  if (rawP != null) {
+    const p = parseFloat(rawP);
+    if (!isNaN(p)) {
+      const pEl = pbfwEl('pbfw-price');
+      if (pEl) {
+        pEl.textContent = p.toFixed(2);
+        pEl.className   = 'pbfw-price-num ' + (pbfwLastPrice == null ? '' : p > pbfwLastPrice ? 'up' : p < pbfwLastPrice ? 'down' : '');
+        pbfwLastPrice = p;
+      }
+    }
+  }
+
+  pbfwEl('pbfw-interval').textContent = d.interval || '--';
+  pbfwEl('pbfw-tgt').textContent  = pbfwFmt(d.target);
+  pbfwEl('pbfw-ent1').textContent  = pbfwFmt(d.entry);
+  pbfwEl('pbfw-ent2').textContent  = pbfwFmt(d.entry2);
+  pbfwEl('pbfw-stp').textContent   = pbfwFmt(d.stop);
+
+  const refs = {
+    'rfw-orbh':pbfwFmt(d.orb_high),'rfw-orbl':pbfwFmt(d.orb_low),
+    'rfw-vwap':pbfwFmt(d.vwap),'rfw-ema':pbfwFmt(d.ema200),
+    'rfw-poc':pbfwFmt(d.poc),'rfw-atr':pbfwFmt(d.atr),
+    'rfw-vah':pbfwFmt(d.vah),'rfw-val':pbfwFmt(d.val),
+    'rfw-pd': (pbfwFmt(d.pdh) + ' / ' + pbfwFmt(d.pdl))
+  };
+  for (const [id,val] of Object.entries(refs)) { const el=pbfwEl(id); if(el) el.textContent=val; }
+  const emaEl = pbfwEl('rfw-ema');
+  if (emaEl) {
+    emaEl.className = 'pbfw-ref-val';
+    if (d.ema_bull === true)  emaEl.classList.add('bull');
+    if (d.ema_bull === false) emaEl.classList.add('bear');
+  }
+
+  if (d.analysis) pbfwEl('pbfw-analysis').textContent = d.analysis;
+
+  const cf = pbfwEl('pbfw-conflict');
+  if (cf) {
+    if (d.conflict === true && d.conflict_note) { cf.classList.add('visible'); pbfwEl('pbfw-conflict-text').textContent = d.conflict_note; }
+    else cf.classList.remove('visible');
+  }
+
+  // Footer
+  const dot = pbfwEl('pbfw-conn-dot');
+  if (dot) { dot.className='pbfw-conn-dot live'; }
+  pbfwEl('pbfw-conn-status').textContent = 'Live · NT8';
+  pbfwEl('pbfw-ts').textContent = new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit'}) + ' ET';
+
+  // Eyebrow
+  const ey = pbfwEl('pbfw-eyebrow');
+  const eyt = pbfwEl('pbfw-eyebrow-text');
+  if (ey) ey.classList.add('is-live');
+  if (eyt) eyt.textContent = '🔴 Analyzer Active';
+}
+
+function pbfwOffline() {
+  const dot = pbfwEl('pbfw-conn-dot');
+  if (dot) dot.className = 'pbfw-conn-dot wait';
+  const cs = pbfwEl('pbfw-conn-status');
+  if (cs) cs.textContent = 'Waiting for NT8...';
+  const ey = pbfwEl('pbfw-eyebrow');
+  const eyt = pbfwEl('pbfw-eyebrow-text');
+  if (ey) ey.classList.remove('is-live');
+  if (eyt) eyt.textContent = 'PBF Trade Analyzer';
+}
+
+pbfwPoll();
+setInterval(pbfwPoll, 2000);
+</script>
 </body>
 </html>

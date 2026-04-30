@@ -18,6 +18,445 @@
   <meta property="og:image" content="assets/PBF-LOGO-MAIN.jpg" />
   <meta name="twitter:card" content="summary_large_image" />
   <link rel="canonical" href="https://profitbyfaith.com/" />
+<style>
+/* ══════════════════════════════════════════
+   PBF ANALYZER HERO SECTION — Homepage
+   Copy into your site's stylesheet or <style> block
+   ══════════════════════════════════════════ */
+
+:root {
+  --pbf-black:   #070a0f;
+  --pbf-navy:    #0d1526;
+  --pbf-navy2:   #131c33;
+  --pbf-gold:    #c9a84c;
+  --pbf-gold2:   #e8c84a;
+  --pbf-goldbr:  #ffd700;
+  --pbf-win:     #2dd4bf;
+  --pbf-win2:    #00e676;
+  --pbf-loss:    #f87171;
+  --pbf-muted:   #6b7587;
+  --pbf-line:    #1e2a48;
+}
+
+#pbf-analyzer-hero {
+  position: relative;
+  width: 100%;
+  background: linear-gradient(180deg, #070a0f 0%, #0d1526 60%, #070a0f 100%);
+  padding: 100px 24px 80px;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+/* Ambient glow orbs */
+#pbf-analyzer-hero::before {
+  content: '';
+  position: absolute;
+  top: -120px; left: 50%;
+  transform: translateX(-50%);
+  width: 700px; height: 700px;
+  background: radial-gradient(ellipse, rgba(201,168,76,0.08) 0%, transparent 65%);
+  pointer-events: none;
+}
+#pbf-analyzer-hero::after {
+  content: '';
+  position: absolute;
+  bottom: -80px; right: -100px;
+  width: 500px; height: 500px;
+  background: radial-gradient(ellipse, rgba(0,230,118,0.05) 0%, transparent 65%);
+  pointer-events: none;
+}
+
+.pbf-hero-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 64px;
+  align-items: center;
+}
+
+@media (max-width: 900px) {
+  .pbf-hero-inner { grid-template-columns: 1fr; gap: 40px; }
+  .pbf-hero-widget { display: flex; justify-content: center; }
+}
+
+/* ── Left copy ── */
+.pbf-hero-copy {}
+
+.pbf-hero-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--pbf-gold);
+  margin-bottom: 20px;
+}
+.pbf-hero-eyebrow .dot-pulse {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--pbf-win2);
+  box-shadow: 0 0 8px var(--pbf-win2);
+  display: none; /* shown when live */
+  animation: pbfPulse 1.4s infinite;
+}
+.pbf-hero-eyebrow.is-live .dot-pulse { display: block; }
+
+.pbf-hero-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(48px, 7vw, 82px);
+  line-height: 0.92;
+  color: #fff;
+  margin: 0 0 16px;
+  letter-spacing: 1px;
+}
+.pbf-hero-title span { color: var(--pbf-gold2); }
+
+.pbf-hero-sub {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 17px;
+  line-height: 1.65;
+  color: #8899bb;
+  max-width: 460px;
+  margin: 0 0 36px;
+}
+.pbf-hero-sub strong { color: #d0daf0; font-weight: 700; }
+
+/* CTA button — shown when NOT live */
+.pbf-hero-cta-wrap {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.pbf-cta-live {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: linear-gradient(135deg, var(--pbf-gold) 0%, var(--pbf-gold2) 100%);
+  color: #060a10;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  padding: 14px 28px;
+  border-radius: 8px;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.pbf-cta-live:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(201,168,76,0.35);
+}
+.pbf-cta-live .yt-icon {
+  width: 20px; height: 20px;
+  background: #060a10;
+  border-radius: 4px;
+  display: flex; align-items: center; justify-content: center;
+}
+.pbf-cta-live .yt-icon::after {
+  content: '';
+  border-style: solid;
+  border-width: 5px 0 5px 9px;
+  border-color: transparent transparent transparent var(--pbf-gold2);
+  margin-left: 2px;
+}
+
+.pbf-cta-secondary {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--pbf-muted);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(107,117,135,0.4);
+  padding-bottom: 1px;
+  transition: color 0.15s;
+}
+.pbf-cta-secondary:hover { color: var(--pbf-gold); }
+
+/* Live banner — replaces CTA when stream is active */
+.pbf-live-banner {
+  display: none;
+  align-items: center;
+  gap: 12px;
+  background: rgba(0,230,118,0.08);
+  border: 1px solid rgba(0,230,118,0.3);
+  border-radius: 8px;
+  padding: 12px 20px;
+}
+.pbf-live-banner.visible { display: flex; }
+.pbf-live-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: var(--pbf-win2);
+  box-shadow: 0 0 10px var(--pbf-win2);
+  animation: pbfPulse 1.2s infinite;
+  flex-shrink: 0;
+}
+.pbf-live-banner-text {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  color: #b5f0c2;
+  font-weight: 600;
+}
+.pbf-live-banner-link {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  color: var(--pbf-win2);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* Stats strip */
+.pbf-hero-stats {
+  display: flex;
+  gap: 28px;
+  margin-top: 32px;
+  padding-top: 28px;
+  border-top: 1px solid rgba(30,42,72,0.8);
+  flex-wrap: wrap;
+}
+.pbf-stat-item { display: flex; flex-direction: column; gap: 3px; }
+.pbf-stat-num {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 26px;
+  color: var(--pbf-gold2);
+  line-height: 1;
+}
+.pbf-stat-label {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--pbf-muted);
+}
+
+/* ── Right widget panel ── */
+.pbf-hero-widget {
+  position: relative;
+}
+
+/* Teaser card — shown when NOT live */
+.pbf-teaser-card {
+  width: 340px;
+  background: linear-gradient(180deg, rgba(13,21,38,0.97) 0%, rgba(7,10,15,0.98) 100%);
+  border: 2px solid var(--pbf-gold);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 16px 48px rgba(0,0,0,0.6), inset 0 1px 0 rgba(212,175,55,0.15);
+  position: relative;
+  filter: blur(1.5px);
+  opacity: 0.65;
+  pointer-events: none;
+  user-select: none;
+  transition: filter 0.6s ease, opacity 0.6s ease;
+}
+.pbf-teaser-card.revealed {
+  filter: blur(0);
+  opacity: 1;
+  pointer-events: auto;
+  user-select: auto;
+}
+
+/* Overlay prompt */
+.pbf-widget-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  z-index: 10;
+  background: rgba(7,10,15,0.45);
+  backdrop-filter: blur(2px);
+  border-radius: 14px;
+  transition: opacity 0.5s ease;
+}
+.pbf-widget-overlay.hidden { opacity: 0; pointer-events: none; }
+
+.pbf-overlay-icon {
+  font-size: 36px;
+  filter: drop-shadow(0 0 12px rgba(201,168,76,0.5));
+}
+.pbf-overlay-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 22px;
+  letter-spacing: 3px;
+  color: var(--pbf-gold2);
+  text-align: center;
+}
+.pbf-overlay-sub {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  color: #8899bb;
+  text-align: center;
+  max-width: 240px;
+  line-height: 1.5;
+}
+.pbf-overlay-time {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--pbf-gold);
+  opacity: 0.8;
+  padding: 6px 14px;
+  border: 1px solid rgba(201,168,76,0.3);
+  border-radius: 20px;
+}
+
+/* ── Teaser card internal sections ── */
+.pbf-tc-header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 10px 14px;
+  background: rgba(7,10,15,0.92);
+  border-bottom: 1px solid rgba(201,168,76,0.3);
+}
+.pbf-tc-brand {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 17px; font-weight: 800;
+  color: var(--pbf-gold2); letter-spacing: 1.5px;
+}
+.pbf-tc-pill {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 3px 9px; border-radius: 999px;
+  font-size: 9px; font-weight: 800; letter-spacing: 1.5px;
+  background: rgba(40,44,60,0.7);
+  border: 1px solid var(--pbf-line); color: #cfd4e0;
+  text-transform: uppercase;
+}
+.pbf-tc-pill .d { width:7px;height:7px;border-radius:50%;background:#555; }
+
+.pbf-tc-signal {
+  padding: 14px 14px 10px;
+  text-align: center;
+  border-bottom: 1px solid var(--pbf-line);
+}
+.pbf-tc-dir {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 52px; font-weight: 900;
+  letter-spacing: 4px; line-height: 0.95;
+  color: var(--pbf-win2);
+  text-shadow: 0 0 24px rgba(0,230,118,0.55);
+}
+.pbf-tc-strat {
+  font-size: 10px; font-weight: 800; padding: 3px 10px;
+  border-radius: 4px; letter-spacing: 1.5px;
+  background: rgba(13,21,38,0.85);
+  color: var(--pbf-gold2); border: 1px solid var(--pbf-gold);
+  text-transform: uppercase; display: inline-block; margin-top: 8px;
+}
+
+.pbf-tc-score {
+  padding: 8px 14px;
+  border-bottom: 1px solid var(--pbf-line);
+}
+.pbf-tc-score-row {
+  display: flex; justify-content: space-between; align-items: baseline;
+  margin-bottom: 4px;
+}
+.pbf-tc-score-label {
+  font-size: 10px; color: #aaa; font-weight: 700;
+  letter-spacing: 1.5px; text-transform: uppercase;
+}
+.pbf-tc-score-num {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 16px; color: var(--pbf-gold2); font-weight: 700;
+}
+.pbf-tc-track {
+  width: 100%; height: 6px;
+  background: rgba(20,28,50,0.85); border-radius: 4px; overflow: hidden;
+}
+.pbf-tc-fill {
+  height: 100%; border-radius: 4px;
+  background: linear-gradient(90deg, var(--pbf-gold), var(--pbf-goldbr));
+  width: 78%;
+  box-shadow: 0 0 10px rgba(255,215,0,0.4);
+}
+
+.pbf-tc-levels {
+  padding: 7px 14px 8px;
+  display: flex; flex-direction: column; gap: 1px;
+}
+.pbf-tc-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 2px 0;
+}
+.pbf-tc-lbl { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: #94a; width: 78px; flex-shrink: 0; }
+.pbf-tc-val { font-size: 14px; font-weight: 800; font-variant-numeric: tabular-nums; color: #fff; flex: 1; text-align: center; }
+.pbf-tc-tag { font-size: 9px; color: #666; font-style: italic; text-align: right; min-width: 70px; text-transform: uppercase; }
+.row-tgt .pbf-tc-lbl, .row-tgt .pbf-tc-val { color: var(--pbf-win2); }
+.row-stp .pbf-tc-lbl, .row-stp .pbf-tc-val { color: var(--pbf-loss); }
+.row-e1  .pbf-tc-val { color: var(--pbf-gold2); }
+.pbf-tc-div { border-top: 1px dashed var(--pbf-line); margin: 2px 0; }
+
+.pbf-tc-analysis {
+  padding: 8px 14px;
+  font-size: 11.5px; color: #d8dde8; line-height: 1.55;
+  font-weight: 500; border-top: 1px solid var(--pbf-line);
+  background: rgba(7,10,15,0.55);
+}
+.pbf-tc-verse {
+  padding: 7px 14px 8px;
+  border-top: 1px solid var(--pbf-line);
+  display: flex; align-items: flex-start; gap: 8px;
+  background: rgba(7,10,15,0.55);
+  font-size: 12px; color: var(--pbf-gold2); font-style: italic; line-height: 1.5;
+}
+.pbf-tc-verse-icon { color: var(--pbf-gold); font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+
+.pbf-tc-footer {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 6px 14px;
+  background: rgba(7,10,15,0.92);
+  border-top: 1px solid rgba(201,168,76,0.2);
+  font-size: 9.5px; color: #777; letter-spacing: 0.5px;
+}
+
+/* ── Live iframe panel ── */
+.pbf-live-frame-wrap {
+  display: none;
+  flex-direction: column;
+  gap: 12px;
+}
+.pbf-live-frame-wrap.visible { display: flex; }
+.pbf-live-frame-label {
+  display: flex; align-items: center; gap: 8px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 11px; font-weight: 800;
+  letter-spacing: 2px; text-transform: uppercase;
+  color: var(--pbf-win2);
+}
+.pbf-live-frame-label .dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--pbf-win2); box-shadow: 0 0 8px var(--pbf-win2);
+  animation: pbfPulse 1.2s infinite;
+}
+.pbf-yt-embed {
+  width: 340px; border-radius: 10px; overflow: hidden;
+  border: 1px solid rgba(0,230,118,0.25);
+  box-shadow: 0 0 28px rgba(0,230,118,0.12);
+  aspect-ratio: 16/9;
+}
+.pbf-yt-embed iframe { width: 100%; height: 100%; border: none; display: block; }
+
+@keyframes pbfPulse { 0%,100%{opacity:1;} 50%{opacity:0.25;} }
+
+/* LIVE page state: animate card border */
+body.pbf-stream-live .pbf-teaser-card {
+  border-color: var(--pbf-win2);
+  box-shadow: 0 0 32px rgba(0,230,118,0.25), inset 0 1px 0 rgba(0,230,118,0.15);
+}
+</style>
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -110,6 +549,156 @@
       </svg>
     </div>
   </section>
+
+  <!-- ══════════════════════════════════
+       PBF TRADE ANALYZER HERO
+  ══════════════════════════════════ -->
+<section id="pbf-analyzer-hero">
+  <div class="pbf-hero-inner">
+
+    <!-- Left: Copy -->
+    <div class="pbf-hero-copy">
+
+      <div class="pbf-hero-eyebrow" id="pbf-eyebrow">
+        <span class="dot-pulse"></span>
+        <span id="pbf-eyebrow-text">PBF Trade Analyzer</span>
+      </div>
+
+      <h2 class="pbf-hero-title">See It<br><span>In Action</span></h2>
+
+      <p class="pbf-hero-sub">
+        Every morning Ryan trades <strong>NQ Futures live</strong> — and the PBF Analyzer is running in real-time.
+        Watch the signals, see the levels, follow the faith.
+        <br><br>
+        <strong>Confluence-scored setups. No guessing.</strong>
+      </p>
+
+      <div class="pbf-hero-cta-wrap">
+        <!-- Shown when NOT live -->
+        <div id="pbf-cta-offline">
+          <a href="https://www.youtube.com/@bullionaireDT" target="_blank" class="pbf-cta-live">
+            <span class="yt-icon"></span>
+            Watch Us Live — M–F 9:30 AM ET
+          </a>
+          <br><br>
+          <a href="/trades" class="pbf-cta-secondary">View trade journal →</a>
+        </div>
+
+        <!-- Shown when live -->
+        <div class="pbf-live-banner" id="pbf-live-banner">
+          <span class="pbf-live-dot"></span>
+          <div>
+            <div class="pbf-live-banner-text">Ryan is live right now — analyzer is active</div>
+            <a class="pbf-live-banner-link" href="https://www.youtube.com/@bullionaireDT" target="_blank">
+              Join the stream on YouTube →
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="pbf-hero-stats">
+        <div class="pbf-stat-item">
+          <span class="pbf-stat-num">15M</span>
+          <span class="pbf-stat-label">ORB Strategy</span>
+        </div>
+        <div class="pbf-stat-item">
+          <span class="pbf-stat-num">NQ</span>
+          <span class="pbf-stat-label">Futures</span>
+        </div>
+        <div class="pbf-stat-item">
+          <span class="pbf-stat-num">M–F</span>
+          <span class="pbf-stat-label">Live Daily</span>
+        </div>
+        <div class="pbf-stat-item">
+          <span class="pbf-stat-num" style="color:var(--pbf-gold2)">LIVE</span>
+          <span class="pbf-stat-label">9:30 AM ET</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: Widget -->
+    <div class="pbf-hero-widget">
+
+      <!-- Teaser preview card (always visible, blurred when offline) -->
+      <div class="pbf-teaser-card" id="pbf-teaser">
+        <div class="pbf-tc-header">
+          <div>
+            <div class="pbf-tc-brand">ProfitByFaith</div>
+            <div style="font-family:'DM Sans',sans-serif;font-size:9.5px;color:#aab;letter-spacing:1.2px;text-transform:uppercase;margin-top:2px;">Pray · Trade · Grow</div>
+          </div>
+          <div>
+            <span class="pbf-tc-pill" id="pbf-market-pill">
+              <span class="d" id="pbf-pill-dot"></span>
+              <span id="pbf-pill-text">CLOSED</span>
+            </span>
+            <div style="font-size:10px;color:#aaa;font-weight:600;margin-top:3px;font-variant-numeric:tabular-nums;" id="pbf-clock">--:--:-- ET</div>
+          </div>
+        </div>
+
+        <div class="pbf-tc-signal">
+          <div style="font-size:10px;font-weight:700;color:var(--pbf-muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;" id="pbf-opp-state">WATCHING FOR BREAK</div>
+          <div class="pbf-tc-dir" id="pbf-dir">LONG</div>
+          <span class="pbf-tc-strat" id="pbf-strat">ORB BREAK</span>
+        </div>
+
+        <div class="pbf-tc-score">
+          <div class="pbf-tc-score-row">
+            <span class="pbf-tc-score-label">Confluence Score</span>
+            <span class="pbf-tc-score-num" id="pbf-score">78 <span style="color:#555;font-size:10px;">/ 100</span></span>
+          </div>
+          <div class="pbf-tc-track"><div class="pbf-tc-fill" id="pbf-fill" style="width:78%"></div></div>
+          <div style="display:flex;justify-content:flex-end;margin-top:4px;gap:6px;align-items:baseline;">
+            <span style="font-size:9px;color:#777;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;">Win Prob</span>
+            <span style="font-family:'Bebas Neue',sans-serif;font-size:14px;color:var(--pbf-gold2);" id="pbf-prob">~64%</span>
+          </div>
+        </div>
+
+        <div class="pbf-tc-levels">
+          <div class="pbf-tc-row row-tgt">
+            <span class="pbf-tc-lbl">Target</span>
+            <span class="pbf-tc-val" id="pbf-tgt">21,348.25</span>
+            <span class="pbf-tc-tag">take profit</span>
+          </div>
+          <div class="pbf-tc-div"></div>
+          <div class="pbf-tc-row row-e1">
+            <span class="pbf-tc-lbl">Entry</span>
+            <span class="pbf-tc-val" id="pbf-ent">21,286.50</span>
+            <span class="pbf-tc-tag">primary</span>
+          </div>
+          <div class="pbf-tc-div"></div>
+          <div class="pbf-tc-row row-stp">
+            <span class="pbf-tc-lbl">Stop</span>
+            <span class="pbf-tc-val" id="pbf-stp">21,254.00</span>
+            <span class="pbf-tc-tag">invalidation</span>
+          </div>
+        </div>
+
+        <div class="pbf-tc-analysis" id="pbf-analysis">
+          ORB breakout confirmed above VAH — EMA 200 bias bullish. POC holding as support. Confluence strong. Watching for first 15M close above ORB High.
+        </div>
+
+        <div class="pbf-tc-verse">
+          <span class="pbf-tc-verse-icon">✝</span>
+          <span id="pbf-verse">"The plans of the diligent lead to profit." <strong>— Prov 21:5</strong></span>
+        </div>
+
+        <div class="pbf-tc-footer">
+          <span><span style="width:7px;height:7px;border-radius:50%;background:var(--pbf-win2);box-shadow:0 0 6px var(--pbf-win2);display:inline-block;margin-right:5px;vertical-align:middle;" id="pbf-conn-dot"></span><span id="pbf-conn-status">Live · NT8</span></span>
+          <span id="pbf-ts">9:47:22 AM ET</span>
+        </div>
+      </div>
+
+      <!-- Overlay shown when not live -->
+      <div class="pbf-widget-overlay" id="pbf-overlay">
+        <div class="pbf-overlay-icon">⚡</div>
+        <div class="pbf-overlay-title">See It Live</div>
+        <div class="pbf-overlay-sub">The analyzer activates when Ryan goes live. Join us every weekday morning.</div>
+        <div class="pbf-overlay-time">Live M–F · 9:30 AM ET</div>
+      </div>
+
+    </div><!-- end widget -->
+  </div>
+</section>
 
   <!-- ══════════════════════════════════
        COUNTDOWN / NOTIFY
@@ -727,5 +1316,195 @@
   </script>
 
   <script src="trading-room.js?v=4"></script>
+
+<script>
+/* ══════════════════════════════════════════
+   PBF ANALYZER — HOMEPAGE SECTION SCRIPT
+   ══════════════════════════════════════════ */
+
+const YOUTUBE_CHANNEL_ID = 'UCCRTRjVQmrCqBcrM8VED-wg';
+const SIGNAL_URL         = 'http://localhost:8080/signal';
+const YT_CHECK_INTERVAL  = 90000;  // 90 seconds
+const SIGNAL_POLL        = 3000;   // 3 seconds when live
+
+let isLive          = false;
+let signalPollTimer = null;
+
+// ── Clock + market state ──────────────────────────────
+function nowET() {
+  return new Date(new Date().toLocaleString('en-US', { timeZone: 'America/New_York' }));
+}
+function fmtClock(d) {
+  const hh = String(d.getHours()).padStart(2,'0');
+  const mm = String(d.getMinutes()).padStart(2,'0');
+  const ss = String(d.getSeconds()).padStart(2,'0');
+  return hh + ':' + mm + ':' + ss + ' ET';
+}
+function marketState(d) {
+  const dow = d.getDay();
+  if (dow === 0 || dow === 6) return 'WEEKEND';
+  const m = d.getHours() * 60 + d.getMinutes();
+  if (m >= 240 && m < 570)  return 'PRE';
+  if (m >= 570 && m <= 960) return 'OPEN';
+  if (m > 960 && m < 1200)  return 'AFTER';
+  return 'CLOSED';
+}
+
+function tickClock() {
+  const d = nowET();
+  const el = document.getElementById('pbf-clock');
+  if (el) el.textContent = fmtClock(d);
+
+  const st = marketState(d);
+  const dot = document.getElementById('pbf-pill-dot');
+  const txt = document.getElementById('pbf-pill-text');
+  const pill = document.getElementById('pbf-market-pill');
+  if (!pill) return;
+  const map = {
+    'OPEN':    { cls:'',        text:'MARKET OPEN',  dot:'#00e676', glow:'#00e676' },
+    'PRE':     { cls:'',        text:'PRE-MARKET',   dot:'#ffc850', glow:'#ffc850' },
+    'AFTER':   { cls:'',        text:'AFTER HOURS',  dot:'#9d7dff', glow:'#9d7dff' },
+    'CLOSED':  { cls:'',        text:'CLOSED',       dot:'#888',    glow:'none' },
+    'WEEKEND': { cls:'',        text:'WEEKEND',      dot:'#888',    glow:'none' }
+  }[st] || {};
+  if (txt) txt.textContent = map.text || 'CLOSED';
+  if (dot) { dot.style.background = map.dot || '#888'; dot.style.boxShadow = map.glow !== 'none' ? `0 0 8px ${map.glow}` : 'none'; }
+}
+setInterval(tickClock, 1000);
+tickClock();
+
+// ── Live detection ────────────────────────────────────
+function setLiveMode(live) {
+  if (isLive === live) return;
+  isLive = live;
+
+  const eyebrow   = document.getElementById('pbf-eyebrow');
+  const eyebrowTx = document.getElementById('pbf-eyebrow-text');
+  const teaser    = document.getElementById('pbf-teaser');
+  const overlay   = document.getElementById('pbf-overlay');
+  const banner    = document.getElementById('pbf-live-banner');
+  const cta       = document.getElementById('pbf-cta-offline');
+
+  if (live) {
+    document.body.classList.add('pbf-stream-live');
+    eyebrow.classList.add('is-live');
+    eyebrowTx.textContent = '🔴 Ryan is Live Now';
+    teaser.classList.add('revealed');
+    overlay.classList.add('hidden');
+    banner.classList.add('visible');
+    if (cta) cta.style.display = 'none';
+    startSignalPoll();
+  } else {
+    document.body.classList.remove('pbf-stream-live');
+    eyebrow.classList.remove('is-live');
+    eyebrowTx.textContent = 'PBF Trade Analyzer';
+    teaser.classList.remove('revealed');
+    overlay.classList.remove('hidden');
+    banner.classList.remove('visible');
+    if (cta) cta.style.display = '';
+    stopSignalPoll();
+  }
+}
+
+// Manual override via URL param: ?pbf_live=1
+if (new URLSearchParams(window.location.search).get('pbf_live') === '1') {
+  setLiveMode(true);
+}
+
+// YouTube API live check
+async function checkYTLive() {
+  if (!YOUTUBE_CHANNEL_ID || YOUTUBE_CHANNEL_ID.includes('xxx')) return;
+  try {
+    const url = `https://www.youtube.com/channel/${YOUTUBE_CHANNEL_ID}/live`;
+    const r = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`, { cache: 'no-store' });
+    const d = await r.json();
+    const live = d.contents && d.contents.includes('"isLive":true');
+    setLiveMode(live);
+  } catch(_) {}
+}
+checkYTLive();
+setInterval(checkYTLive, YT_CHECK_INTERVAL);
+
+// ── Signal polling (when live) ────────────────────────
+function startSignalPoll() {
+  if (signalPollTimer) return;
+  pollSignal();
+  signalPollTimer = setInterval(pollSignal, SIGNAL_POLL);
+}
+function stopSignalPoll() {
+  if (signalPollTimer) { clearInterval(signalPollTimer); signalPollTimer = null; }
+}
+
+async function pollSignal() {
+  try {
+    const r = await fetch(SIGNAL_URL, { cache: 'no-store', signal: AbortSignal.timeout ? AbortSignal.timeout(3000) : undefined });
+    if (!r.ok) return;
+    const d = await r.json();
+    applySignal(d);
+  } catch(_) {}
+}
+
+function fmt(v) {
+  const n = parseFloat(v);
+  return (!v || isNaN(n) || n === 0) ? '--' : n.toFixed(2);
+}
+function fmtPct(score) {
+  return '~' + Math.min(99, Math.max(0, Math.round(score * 0.72 + 8))) + '%';
+}
+
+function applySignal(d) {
+  const dir    = (d.direction || 'LONG').toUpperCase();
+  const score  = Math.max(0, Math.min(100, d.score || 0));
+  const opp    = (d.opp_state || 'WATCHING').toUpperCase();
+  const strat  = (d.strategy || 'ORB BREAK').toUpperCase().replace(/-/g,' ');
+
+  const el = id => document.getElementById(id);
+
+  el('pbf-dir').textContent  = dir === 'SELL' ? 'SHORT' : 'LONG';
+  el('pbf-dir').style.color  = dir === 'SELL' ? '#f87171' : '#00e676';
+  el('pbf-dir').style.textShadow = dir === 'SELL'
+    ? '0 0 24px rgba(255,82,82,0.55)'
+    : '0 0 24px rgba(0,230,118,0.55)';
+
+  el('pbf-opp-state').textContent = {
+    'WAITING':'WAITING FOR ORB','WATCHING':'WATCHING FOR BREAK',
+    'APPROACHING':'APPROACHING LEVEL','ACTIVE':'TRADE ACTIVE',
+    'HIT':'TARGET HIT','STOPPED':'STOPPED OUT','PASSED':'OPPORTUNITY PASSED'
+  }[opp] || opp;
+
+  el('pbf-strat').textContent = strat;
+  el('pbf-score').innerHTML   = score + ' <span style="color:#555;font-size:10px;">/ 100</span>';
+  el('pbf-fill').style.width  = score + '%';
+  el('pbf-prob').textContent  = fmtPct(score);
+  el('pbf-tgt').textContent   = fmt(d.target);
+  el('pbf-ent').textContent   = fmt(d.entry);
+  el('pbf-stp').textContent   = fmt(d.stop);
+  if (d.analysis) el('pbf-analysis').textContent = d.analysis;
+
+  const connDot = el('pbf-conn-dot');
+  if (connDot) {
+    connDot.style.background = '#00e676';
+    connDot.style.boxShadow  = '0 0 6px #00e676';
+  }
+  el('pbf-conn-status').textContent = 'Live · NT8';
+  el('pbf-ts').textContent = new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit'}) + ' ET';
+}
+
+// Rotate demo verse (offline state)
+const VERSES = [
+  '"The plans of the diligent lead to profit." — Prov 21:5',
+  '"Commit to the Lord whatever you do, and he will establish your plans." — Prov 16:3',
+  '"I can do all things through Christ who strengthens me." — Phil 4:13',
+  '"Trust in the Lord with all your heart." — Prov 3:5',
+  '"Seek first his kingdom… and all these things will be given to you." — Matt 6:33'
+];
+let vi = 0;
+function rotateVerse() {
+  vi = (vi + 1) % VERSES.length;
+  const el = document.getElementById('pbf-verse');
+  if (el) el.innerHTML = VERSES[vi];
+}
+setInterval(rotateVerse, 14000);
+</script>
 </body>
 </html>
