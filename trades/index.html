@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet" />
   <link rel="canonical" href="https://profitbyfaith.com/trades/" />
-  <link rel="stylesheet" href="journal.css?v=9" />
+  <link rel="stylesheet" href="journal.css?v=10" />
 <style>
 /*
   TRADES PAGE — PBF ANALYZER WIDGET SECTION
@@ -339,6 +339,14 @@
 }
 .sc-gauge-val {
   font-size: 1.8rem;
+}
+
+/* ── Spacing: gap between stat cards and cal-nav / section content below ── */
+.stat-cards {
+  margin-bottom: 1.5rem;
+}
+.cal-nav {
+  margin-top: 0.5rem;
 }
 
 /* ── Signal Consistency sub-section ── */
@@ -860,7 +868,7 @@
   </div>
 </footer>
 
-<script src="journal.js?v=9"></script>
+<script src="journal.js?v=10"></script>
 
 <script>
 /* ══════════════════════════════════════════
@@ -1089,6 +1097,18 @@ function pbfwOffline() {
 
 pbfwPoll();
 setInterval(pbfwPoll, 2000);
+
+/* ══════════════════════════════════════════
+   PBF SIGNAL CONSISTENCY — fallback boot
+   journal.js calls renderAnalyzerSection() via renderAll(),
+   but if journalData is already loaded by the time this script
+   runs, trigger it directly here as well.
+   ══════════════════════════════════════════ */
+window.addEventListener('load', () => {
+  if (typeof journalData !== 'undefined' && Object.keys(journalData).length > 0) {
+    if (typeof renderAnalyzerSection === 'function') renderAnalyzerSection();
+  }
+});
 
 /* ══════════════════════════════════════════
    PBF SIGNAL CONSISTENCY — stat cards + trade log
