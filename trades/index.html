@@ -134,7 +134,7 @@
 /* Card sections */
 .pbfw-c-header {
   display: flex; justify-content: space-between; align-items: center;
-  padding: 10px 14px;
+  padding: 12px 14px;
   background: rgba(7,10,15,0.92);
   border-bottom: 1px solid rgba(201,168,76,0.35);
   position: relative;
@@ -149,7 +149,13 @@
   font-size: 18px; font-weight: 800; color: var(--pbfw-gold2);
   letter-spacing: 1.5px; line-height: 1;
 }
-.pbfw-c-tagline { font-size: 9.5px; color: #aab; letter-spacing: 1.2px; text-transform: uppercase; margin-top: 2px; }
+.pbfw-c-appname {
+  font-size: 10px; font-weight: 800; letter-spacing: 2px;
+  text-transform: uppercase; margin-top: 3px;
+}
+.pbfw-c-appname .word-signal   { color: #ffffff; }
+.pbfw-c-appname .word-analyzer { color: var(--pbfw-gold2); }
+.pbfw-c-tagline { font-size: 8.5px; color: #8899bb; letter-spacing: 1.2px; text-transform: uppercase; margin-top: 2px; }
 
 .pbfw-c-pill {
   display: inline-flex; align-items: center; gap: 5px;
@@ -436,12 +442,13 @@
     <div class="pbfw-card" id="pbfw-card">
 
       <div class="pbfw-c-header">
-        <div>
-          <img src="https://profitbyfaith.com/assets/PBF-LOGO-MAIN.jpg" alt="PBF" style="height:36px;width:auto;object-fit:contain;filter:drop-shadow(0 0 4px rgba(201,168,76,0.35));vertical-align:middle;margin-right:9px;">
-          <span>
-            <div class="pbfw-c-brand" style="display:inline;vertical-align:middle;">ProfitByFaith</div>
-          </span>
-          <div class="pbfw-c-tagline">Pray · Trade · Grow</div>
+        <div style="display:flex;align-items:center;gap:9px;">
+          <img src="https://profitbyfaith.com/assets/PBF-LOGO-MAIN.jpg" alt="PBF" style="height:42px;width:auto;object-fit:contain;filter:drop-shadow(0 0 4px rgba(201,168,76,0.35));flex-shrink:0;">
+          <div>
+            <div class="pbfw-c-brand">ProfitByFaith</div>
+            <div class="pbfw-c-appname"><span class="word-signal">Signal</span> <span class="word-analyzer">Analyzer</span></div>
+            <div class="pbfw-c-tagline">Pray · Trade · Grow</div>
+          </div>
         </div>
         <div style="text-align:right;">
           <span class="pbfw-c-pill" id="pbfw-c-pill">
