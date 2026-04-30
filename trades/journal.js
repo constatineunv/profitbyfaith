@@ -116,6 +116,7 @@ function renderAll() {
   renderStatsPanel();
   renderEquityCurve();
   renderCalendar();
+  if (typeof renderAnalyzerSection === 'function') renderAnalyzerSection();
 }
 
 /* ════════════════════════════════════════════════
