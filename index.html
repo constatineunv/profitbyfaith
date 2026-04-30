@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -107,7 +107,7 @@
 
 .pbf-hero-title {
   font-family: 'Bebas Neue', sans-serif;
-  font-size: clamp(48px, 7vw, 82px);
+  font-size: clamp(64px, 9vw, 108px);
   line-height: 0.92;
   color: #fff;
   margin: 0 0 16px;
@@ -561,10 +561,10 @@ body.pbf-stream-live .pbf-teaser-card {
 
       <div class="pbf-hero-eyebrow" id="pbf-eyebrow">
         <span class="dot-pulse"></span>
-        <span id="pbf-eyebrow-text">Signal Analyzer</span>
+        <span id="pbf-eyebrow-text">PBF Trade Analyzer</span>
       </div>
 
-      <h2 class="pbf-hero-title">See It<br><span>In Action</span></h2>
+      <h2 class="pbf-hero-title">Signal<br><span>Analyzer</span></h2>
 
       <p class="pbf-hero-sub">
         Every morning Mr. Bullionaire trades <strong>NQ Futures live</strong> — and the Signal Analyzer is running in real-time.
@@ -922,6 +922,28 @@ body.pbf-stream-live .pbf-teaser-card {
           </ul>
         </div>
 
+
+        <div class="strategy-card decision-inputs" id="decision-inputs">
+          <div class="strategy-num">03</div>
+          <h3>Decision Inputs</h3>
+          <div class="divider"></div>
+          <p>Enter today's key price levels to power the Signal Analyzer's confluence scoring.</p>
+          <div class="di-fields">
+            <label class="di-label">PDH <input class="di-input" id="di-pdh" type="number" placeholder="0.00" step="0.25"></label>
+            <label class="di-label">PDL <input class="di-input" id="di-pdl" type="number" placeholder="0.00" step="0.25"></label>
+            <label class="di-label">ONH <input class="di-input" id="di-onh" type="number" placeholder="0.00" step="0.25"></label>
+            <label class="di-label">ONL <input class="di-input" id="di-onl" type="number" placeholder="0.00" step="0.25"></label>
+            <label class="di-label">RTH Open <input class="di-input" id="di-rth" type="number" placeholder="0.00" step="0.25"></label>
+            <label class="di-label">POC <input class="di-input" id="di-poc" type="number" placeholder="0.00" step="0.25"></label>
+            <label class="di-label">VAH <input class="di-input" id="di-vah" type="number" placeholder="0.00" step="0.25"></label>
+            <label class="di-label">VAL <input class="di-input" id="di-val" type="number" placeholder="0.00" step="0.25"></label>
+            <label class="di-label">PWH <input class="di-input" id="di-pwh" type="number" placeholder="0.00" step="0.25"></label>
+            <label class="di-label">ORB High <input class="di-input" id="di-orb-h" type="number" placeholder="0.00" step="0.25"></label>
+            <label class="di-label">ORB Low <input class="di-input" id="di-orb-l" type="number" placeholder="0.00" step="0.25"></label>
+            <label class="di-label">EMA 200 <input class="di-input" id="di-ema200" type="number" placeholder="0.00" step="0.25"></label>
+          </div>
+          <button class="btn btn-gold di-apply" id="di-apply-btn">Apply Levels</button>
+        </div>
       </div>
       <div style="text-align:center; margin-top:2.5rem;">
         <p style="margin-bottom:1rem;">Want to learn these strategies step by step?</p>
@@ -1506,5 +1528,6 @@ function rotateVerse() {
 }
 setInterval(rotateVerse, 14000);
 </script>
+  <script src="pbf-patch.js?v=1"></script>
 </body>
 </html>

@@ -1,0 +1,42 @@
+/* pbf-patch.css v1 — Decision Inputs panel */
+.decision-inputs .di-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 12px;
+  margin: 1rem 0;
+}
+.di-label {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--muted, #7a8ba8);
+}
+.di-input {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 5px;
+  color: #fff;
+  font-size: 0.85rem;
+  padding: 5px 8px;
+  width: 100%;
+  -moz-appearance: textfield;
+}
+.di-input::-webkit-inner-spin-button,
+.di-input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+.di-input:focus {
+  outline: none;
+  border-color: rgba(201,168,76,0.5);
+  background: rgba(201,168,76,0.06);
+}
+.di-apply {
+  width: 100%;
+  margin-top: 0.25rem;
+}
+.di-apply.applied {
+  background: #4caf82 !important;
+  border-color: #4caf82 !important;
+  color: #fff !important;
+}
