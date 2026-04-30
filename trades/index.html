@@ -1082,6 +1082,21 @@ function pbfwApply(d) {
   const eyt = pbfwEl('pbfw-eyebrow-text');
   if (ey) ey.classList.add('is-live');
   if (eyt) eyt.textContent = '🔴 Analyzer Active';
+
+  // Track signal transitions → write to localStorage signal log
+  pbfwTrackTransition(d);
+}
+
+function pbfwTrackTransition(d) {
+  const opp = (d.opp_state || 'WAITING').toUpperCase();
+  const dir = (d.direction || '').toUpperCase();
+  if (opp !== pbfwLastOppForLog) {
+    if (opp === 'ACTIVE')       pbfwAppendSignal(d, dir);
+    else if (opp === 'HIT')     pbfwMarkLogResult('W');
+    else if (opp === 'STOPPED') pbfwMarkLogResult('L');
+  }
+  pbfwLastOppForLog = opp;
+  if (d.tally) { pbfwLastTallyData = d.tally; renderAnalyzerSection(); }
 }
 
 function pbfwOffline() {
@@ -1099,169 +1114,220 @@ pbfwPoll();
 setInterval(pbfwPoll, 2000);
 
 /* ══════════════════════════════════════════
-   PBF SIGNAL CONSISTENCY — fallback boot
-   journal.js calls renderAnalyzerSection() via renderAll(),
-   but if journalData is already loaded by the time this script
-   runs, trigger it directly here as well.
+   PBF SIGNAL LOG — localStorage trade tracking
+   Same key format as PBFOverlay.html: pbf_trade_log_YYYY-MM-DD
+   Built from live signal polling when this page is open + NT8 running.
+   OBS browser source uses isolated localStorage — this is independent.
    ══════════════════════════════════════════ */
-window.addEventListener('load', () => {
-  if (typeof journalData !== 'undefined' && Object.keys(journalData).length > 0) {
-    if (typeof renderAnalyzerSection === 'function') renderAnalyzerSection();
-  }
-});
+
+const PBFW_LOG_PREFIX   = 'pbf_trade_log_';
+const PBFW_LOG_MAX      = 30;
+let   pbfwLastOppForLog = null;
+let   pbfwLastTallyData = null;
+
+function pbfwETDateStr() {
+  const d = pbfwNowET();
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+function pbfwDayLogKey(ds) { return PBFW_LOG_PREFIX + (ds || pbfwETDateStr()); }
+function pbfwDayLog(ds)    { try { return JSON.parse(localStorage.getItem(pbfwDayLogKey(ds)) || '[]'); } catch(_) { return []; } }
+function pbfwSaveDayLog(log, ds) { try { localStorage.setItem(pbfwDayLogKey(ds), JSON.stringify(log)); } catch(_) {} }
+
+function pbfwAppendSignal(d, dir) {
+  const log = pbfwDayLog();
+  log.unshift({
+    id:     Date.now(),
+    time:   new Date().toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit' }),
+    dir:    dir,
+    strat:  (d.strategy || '--').toUpperCase().replace(/-/g,' '),
+    entry:  d.entry  ? parseFloat(d.entry).toFixed(2)  : '--',
+    stop:   d.stop   ? parseFloat(d.stop).toFixed(2)   : '--',
+    target: d.target ? parseFloat(d.target).toFixed(2) : '--',
+    score:  Math.round(d.score || 0),
+    result: '--'
+  });
+  if (log.length > PBFW_LOG_MAX) log.length = PBFW_LOG_MAX;
+  pbfwSaveDayLog(log);
+  renderAnalyzerSection();
+}
+
+function pbfwMarkLogResult(result) {
+  const log = pbfwDayLog();
+  const row = log.find(r => r.result === '--');
+  if (!row) return;
+  row.result = result;
+  pbfwSaveDayLog(log);
+  renderAnalyzerSection();
+}
+
 
 /* ══════════════════════════════════════════
-   PBF SIGNAL CONSISTENCY — stat cards + trade log
-   Called by journal.js renderAll() after data loads
+   PBF SIGNAL CONSISTENCY — stat cards + signal log
+   Data: localStorage keys pbf_trade_log_YYYY-MM-DD
+   Built live from signal polling when page is open with NT8 running.
+   Stat cards use data.tally from NT8 when available, else localStorage.
    ══════════════════════════════════════════ */
 
 function renderAnalyzerSection() {
-  if (typeof journalData === 'undefined' || !journalData) return;
-  if (typeof computeStats !== 'function' || typeof gaugeArcPath !== 'function') return;
+  // ── Gather all signal log data from localStorage ──────────────────────
+  const allKeys = [];
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (k && k.startsWith(PBFW_LOG_PREFIX)) allKeys.push(k);
+    }
+  } catch(_) {}
+  allKeys.sort().reverse();
 
-  // ── Stat cards (all-time) ───────────────────────────
-  const s = computeStats(null);
+  const byDay = {};
+  const allRows = [];
+  for (const k of allKeys) {
+    const ds   = k.replace(PBFW_LOG_PREFIX, '');
+    const rows = pbfwDayLog(ds);
+    if (rows.length) { byDay[ds] = rows; allRows.push(...rows); }
+  }
 
-  const fmtPnl = v => {
-    const abs = '$' + Math.abs(v).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
-    return (v >= 0 ? '+' : '-') + abs;
-  };
+  // ── Stats (prefer live NT8 tally; fall back to localStorage counts) ────
+  let totalSig, wins, losses, bes, winRate;
+  if (pbfwLastTallyData) {
+    wins     = pbfwLastTallyData.wins     || 0;
+    losses   = pbfwLastTallyData.losses   || 0;
+    bes      = pbfwLastTallyData.be       || 0;
+    totalSig = pbfwLastTallyData.signals  || allRows.length;
+    winRate  = pbfwLastTallyData.win_rate != null ? pbfwLastTallyData.win_rate : 0;
+  } else {
+    const scored = allRows.filter(r => r.result !== '--');
+    wins     = scored.filter(r => r.result === 'W').length;
+    losses   = scored.filter(r => r.result === 'L').length;
+    bes      = scored.filter(r => r.result === 'BE').length;
+    totalSig = allRows.length;
+    const decisive = wins + losses;
+    winRate  = decisive > 0 ? Math.round(wins / decisive * 100) : 0;
+  }
+  const decisive = wins + losses;
+  const winFrac  = decisive > 0 ? wins / decisive : 0;
 
+  // Card 1 — Total Signals
+  const sc1lbl = document.querySelector('#pbfw-stat-pnl')?.closest('.stat-card')?.querySelector('.sc-label');
+  if (sc1lbl) sc1lbl.textContent = 'Total Signals';
   const pnlEl = document.getElementById('pbfw-stat-pnl');
-  if (pnlEl) { pnlEl.textContent = fmtPnl(s.totalPnl); pnlEl.className = 'sc-value ' + (s.totalPnl >= 0 ? 'green' : 'red'); }
+  if (pnlEl) { pnlEl.textContent = totalSig || '0'; pnlEl.className = 'sc-value'; }
   const pnlSubEl = document.getElementById('pbfw-stat-pnl-sub');
-  if (pnlSubEl) pnlSubEl.textContent = 'All time';
+  if (pnlSubEl) pnlSubEl.textContent = allKeys.length + ' session' + (allKeys.length !== 1 ? 's' : '') + ' logged';
 
+  // Card 2 — Win Rate gauge
+  const sc2lbl = document.querySelector('#pbfw-stat-winrate')?.closest('.stat-card')?.querySelector('.sc-label');
+  if (sc2lbl) sc2lbl.textContent = 'Win Rate';
   const winrateEl = document.getElementById('pbfw-stat-winrate');
-  if (winrateEl) winrateEl.textContent = Math.round(s.tradeWinPct * 100) + '%';
+  if (winrateEl) winrateEl.textContent = winRate + '%';
   const winrateSubEl = document.getElementById('pbfw-stat-winrate-sub');
-  if (winrateSubEl) winrateSubEl.textContent = `${s.wins} W  /  ${s.losses} L`;
+  if (winrateSubEl) winrateSubEl.textContent = wins + ' W / ' + losses + ' L';
   const tradeArc = document.getElementById('pbfw-g-trade-arc');
-  if (tradeArc) tradeArc.setAttribute('d', gaugeArcPath(s.tradeWinPct));
+  if (tradeArc && typeof gaugeArcPath === 'function') tradeArc.setAttribute('d', gaugeArcPath(winFrac));
 
+  // Card 3 — Decisive trades breakdown
+  const sc3lbl = document.querySelector('#pbfw-stat-dayrate')?.closest('.stat-card')?.querySelector('.sc-label');
+  if (sc3lbl) sc3lbl.textContent = 'Decisive Trades';
   const dayrateEl = document.getElementById('pbfw-stat-dayrate');
-  if (dayrateEl) dayrateEl.textContent = Math.round(s.dayWinPct * 100) + '%';
+  if (dayrateEl) { dayrateEl.textContent = decisive + ''; dayrateEl.className = 'sc-gauge-val'; }
   const dayrateSubEl = document.getElementById('pbfw-stat-dayrate-sub');
-  if (dayrateSubEl) dayrateSubEl.textContent = `${s.greenDays} green  /  ${s.redDays} red`;
+  if (dayrateSubEl) dayrateSubEl.textContent = wins + 'W  ' + losses + 'L  ' + bes + 'BE';
   const dayArc = document.getElementById('pbfw-g-day-arc');
-  if (dayArc) dayArc.setAttribute('d', gaugeArcPath(s.dayWinPct));
+  if (dayArc && typeof gaugeArcPath === 'function') dayArc.setAttribute('d', gaugeArcPath(decisive > 0 ? wins / (decisive + bes) : 0));
 
+  // Card 4 — Win/Loss ratio
+  const sc4lbl = document.querySelector('#pbfw-stat-ratio')?.closest('.stat-card')?.querySelector('.sc-label');
+  if (sc4lbl) sc4lbl.textContent = 'Win / Loss';
   const ratioEl = document.getElementById('pbfw-stat-ratio');
-  if (ratioEl) { ratioEl.textContent = s.ratio > 0 ? s.ratio.toFixed(2) + 'x' : '—'; ratioEl.className = 'sc-value ' + (s.ratio >= 1 ? 'green' : 'red'); }
+  if (ratioEl) {
+    const r = losses > 0 ? (wins / losses).toFixed(2) : wins > 0 ? wins + '.00' : '0';
+    ratioEl.textContent = r + 'x';
+    ratioEl.className = 'sc-value ' + (decisive > 0 ? (wins >= losses ? 'green' : 'red') : '');
+  }
   const ratioSubEl = document.getElementById('pbfw-stat-ratio-sub');
-  if (ratioSubEl) ratioSubEl.textContent = '$' + Math.round(s.avgWin).toLocaleString() + ' avg win';
+  if (ratioSubEl) ratioSubEl.textContent = bes + ' break-even' + (bes !== 1 ? 's' : '');
 
-  // ── Trade log ───────────────────────────────────────
+  // ── Signal log table ────────────────────────────────────────────────────
   const logEl = document.getElementById('pbfw-trade-log');
   if (!logEl) return;
+  const noteEl = document.getElementById('pbfw-log-note');
 
-  const firmCls = acct => {
-    const a = (acct || '').toLowerCase();
-    if (a.includes('bx-') || a.includes('bulenox')) return 'bulenox';
-    if (a.includes('take') || a.includes('profit539') || a.includes('tpt')) return 'tpt';
-    return 'apex';
-  };
-  const firmLbl = acct => {
-    const a = (acct || '').toLowerCase();
-    if (a.includes('bx-') || a.includes('bulenox')) return 'Bulenox';
-    if (a.includes('take') || a.includes('profit539') || a.includes('tpt')) return 'TPT';
-    return 'Apex';
-  };
-  const tagCls = p => p > 50 ? 'good' : p < -100 ? 'bad' : 'ugly';
-  const fmtT = raw => {
-    if (!raw) return '—';
-    const pts = (raw || '').split(' ');
-    if (pts.length < 2) return raw;
-    return pts[1].split(':').slice(0,2).join(':') + (pts[2] ? ' ' + pts[2] : '');
-  };
+  if (!allRows.length) {
+    logEl.innerHTML = '<div style="color:var(--muted);font-size:0.85rem;padding:1.5rem;text-align:center;font-style:italic;line-height:1.7;">No signals logged yet.<br>Open this page with NT8 running — signals are recorded automatically<br>when the analyzer transitions to an active trade.</div>';
+    if (noteEl) noteEl.textContent = 'Recorded from live signal polling';
+    return;
+  }
 
-  const allDays = Object.entries(journalData).sort(([a],[b]) => b.localeCompare(a));
+  if (noteEl) noteEl.textContent = allRows.length + ' signal' + (allRows.length !== 1 ? 's' : '') + ' logged · Click row to drill down';
 
-  let html = `<div class="recap-col-head">
-    <span>#</span><span>dir</span><span>entry &rarr; exit</span><span>time</span><span>account</span><span>tag</span><span style="text-align:right">p&l</span>
-  </div>`;
+  const COL = '80px 52px 1fr 72px 72px 72px 44px';
+  let html = '<div class="recap-col-head" style="grid-template-columns:' + COL + ';">'
+    + '<span>time</span><span>dir</span><span>strategy</span>'
+    + '<span>entry</span><span>stop</span><span>target</span><span>result</span>'
+    + '</div>';
 
-  let total = 0;
-  const MAX = 30;
-
-  for (const [ds, day] of allDays) {
-    const trades = day.trades || [];
-    if (!trades.length) continue;
-
+  for (const [ds, rows] of Object.entries(byDay).sort(([a],[b]) => b.localeCompare(a))) {
     const dl = new Date(ds + 'T12:00:00')
       .toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric', year:'numeric' });
-    const dp = day.pnl;
-    html += `<div class="recap-acct-group">
-      <span>${dl}</span>
-      <span style="color:${dp >= 0 ? 'var(--win)' : 'var(--loss)'};font-weight:700;">${dp >= 0 ? '+$' : '-$'}${Math.abs(dp).toLocaleString('en-US',{minimumFractionDigits:0})}</span>
-    </div>`;
+    const dW  = rows.filter(r => r.result === 'W').length;
+    const dL  = rows.filter(r => r.result === 'L').length;
+    const dBE = rows.filter(r => r.result === 'BE').length;
+    html += '<div class="recap-acct-group"><span>' + dl + '</span>'
+      + '<span style="font-size:0.75rem;color:var(--muted);">' + dW + 'W · ' + dL + 'L · ' + dBE + 'BE</span></div>';
 
-    for (let i = 0; i < trades.length && total < MAX; i++, total++) {
-      const t   = trades[i];
-      const p   = t.profit || 0;
-      const dir = (t.direction || '').toLowerCase();
-      const tag = tagCls(p);
-      const ep  = t.entryPrice || '—';
-      const xp  = t.exitPrice  || '—';
-      const fc  = firmCls(t.account);
-      const fl  = firmLbl(t.account);
-      const bdg = fc === 'tpt' ? 'TPT' : fc === 'apex' ? 'APEX' : 'BUL';
-      const entT = fmtT(t.entryTime);
-      const extT = fmtT(t.exitTime);
-      const timeStr = extT !== '—' ? `${entT} – ${extT}` : entT;
-      const rId = `pbfw-r-${ds}-${i}`;
-      const dId = `pbfw-d-${ds}-${i}`;
-
-      html += `<div class="recap-trade-row recap-expandable" id="${rId}" data-drawer="${dId}">
-        <span style="color:#7a8ba8;font-size:0.68rem">${i+1}</span>
-        <span class="dir-badge ${dir}">${dir}</span>
-        <span style="font-family:monospace;font-size:0.72rem;color:#a0a8b8">${ep} &rarr; ${xp}</span>
-        <span class="recap-time-cell">${timeStr}</span>
-        <span style="font-size:0.68rem;color:#7a8ba8">${fl}</span>
-        <span class="tag-badge ${tag}">${tag}</span>
-        <span style="text-align:right;font-family:monospace;font-size:0.75rem;font-weight:600;color:${p >= 0 ? 'var(--win)' : 'var(--loss)'}">${p >= 0 ? '+$' : '-$'}${Math.abs(p).toFixed(2)}</span>
-      </div>
-      <div class="recap-trade-drawer" id="${dId}">
-        <div class="rtd-inner">
-          <div class="rtd-grid">
-            <div class="rtd-field"><div class="rtd-label">Date</div><div class="rtd-val">${dl}</div></div>
-            <div class="rtd-field"><div class="rtd-label">Entry time</div><div class="rtd-val">${t.entryTime || '—'}</div></div>
-            <div class="rtd-field"><div class="rtd-label">Exit time</div><div class="rtd-val">${t.exitTime || '—'}</div></div>
-            <div class="rtd-field"><div class="rtd-label">Direction</div><div class="rtd-val"><span class="dir-badge ${dir}">${dir}</span></div></div>
-            <div class="rtd-field"><div class="rtd-label">Entry &rarr; Exit</div><div class="rtd-val" style="font-family:monospace;color:#a0a8b8">${ep} &rarr; ${xp}</div></div>
-            <div class="rtd-field"><div class="rtd-label">P&amp;L</div><div class="rtd-val" style="font-weight:700;color:${p >= 0 ? 'var(--win)' : 'var(--loss)'}">${p >= 0 ? '+$' : '-$'}${Math.abs(p).toFixed(2)}</div></div>
-            <div class="rtd-field"><div class="rtd-label">Tag</div><div class="rtd-val"><span class="tag-badge ${tag}">${tag}</span></div></div>
-            <div class="rtd-field"><div class="rtd-label">Instrument</div><div class="rtd-val">${t.instrument || '—'}</div></div>
-            <div class="rtd-field"><div class="rtd-label">Account</div><div class="rtd-val"><span class="recap-firm-badge ${fc}">${bdg}</span> <span style="font-size:0.72rem;color:#a0a8b8">${t.account || '—'}</span></div></div>
-          </div>
-        </div>
-      </div>`;
-    }
-    if (total >= MAX) break;
+    rows.forEach(function(r, i) {
+      const rId    = 'pbfw-sr-' + ds + '-' + i;
+      const dId    = 'pbfw-sd-' + ds + '-' + i;
+      const dirCls = r.dir === 'BUY' ? 'td-buy' : 'td-sell';
+      const rc     = r.result === 'W' ? 'res-w' : r.result === 'L' ? 'res-l' : r.result === 'BE' ? 'res-be' : '';
+      html += '<div class="recap-trade-row recap-expandable" id="' + rId + '" data-drawer="' + dId + '" style="grid-template-columns:' + COL + ';">'
+        + '<span style="font-size:0.73rem;color:#aab;font-variant-numeric:tabular-nums;">' + r.time + '</span>'
+        + '<span class="' + dirCls + '" style="font-weight:800;font-size:0.75rem;">' + r.dir + '</span>'
+        + '<span style="font-size:0.76rem;color:#d0d8e8;">' + r.strat + '</span>'
+        + '<span style="font-family:monospace;font-size:0.72rem;color:#a0a8b8;">' + r.entry + '</span>'
+        + '<span style="font-family:monospace;font-size:0.72rem;color:var(--loss);">' + r.stop + '</span>'
+        + '<span style="font-family:monospace;font-size:0.72rem;color:var(--win);">' + r.target + '</span>'
+        + '<span class="td-result ' + rc + '" style="font-weight:800;">' + r.result + '</span>'
+        + '</div>'
+        + '<div class="recap-trade-drawer" id="' + dId + '"><div class="rtd-inner"><div class="rtd-grid">'
+        + '<div class="rtd-field"><div class="rtd-label">Date</div><div class="rtd-val">' + dl + '</div></div>'
+        + '<div class="rtd-field"><div class="rtd-label">Time</div><div class="rtd-val">' + r.time + '</div></div>'
+        + '<div class="rtd-field"><div class="rtd-label">Direction</div><div class="rtd-val"><span class="' + dirCls + '" style="font-weight:800;">' + r.dir + '</span></div></div>'
+        + '<div class="rtd-field"><div class="rtd-label">Strategy</div><div class="rtd-val">' + r.strat + '</div></div>'
+        + '<div class="rtd-field"><div class="rtd-label">Entry</div><div class="rtd-val" style="font-family:monospace;">' + r.entry + '</div></div>'
+        + '<div class="rtd-field"><div class="rtd-label">Stop</div><div class="rtd-val" style="font-family:monospace;color:var(--loss);">' + r.stop + '</div></div>'
+        + '<div class="rtd-field"><div class="rtd-label">Target</div><div class="rtd-val" style="font-family:monospace;color:var(--win);">' + r.target + '</div></div>'
+        + '<div class="rtd-field"><div class="rtd-label">Confluence</div><div class="rtd-val">' + (r.score != null ? r.score + ' / 100' : '&mdash;') + '</div></div>'
+        + '<div class="rtd-field"><div class="rtd-label">Result</div><div class="rtd-val"><span class="td-result ' + rc + '" style="font-size:0.9rem;font-weight:800;">' + r.result + '</span></div></div>'
+        + '</div></div></div>';
+    });
   }
 
   logEl.innerHTML = html;
 
-  const noteEl = document.getElementById('pbfw-log-note');
-  if (noteEl) noteEl.textContent = `Last ${total} trades · Click row to drill down`;
-
-  // Click-to-expand handlers
-  let _pbfwOpenId = null;
-  logEl.querySelectorAll('.recap-expandable').forEach(row => {
-    row.addEventListener('click', () => {
-      const did = row.dataset.drawer;
+  var _sigOpenId = null;
+  logEl.querySelectorAll('.recap-expandable').forEach(function(row) {
+    row.addEventListener('click', function() {
+      const did    = row.dataset.drawer;
       const drawer = document.getElementById(did);
       if (!drawer) return;
       const isOpen = drawer.classList.contains('open');
-      if (_pbfwOpenId && _pbfwOpenId !== did) {
-        const prev = document.getElementById(_pbfwOpenId);
-        if (prev) { prev.classList.remove('open'); const pr = logEl.querySelector(`[data-drawer="${_pbfwOpenId}"]`); if (pr) pr.classList.remove('recap-row-active'); }
+      if (_sigOpenId && _sigOpenId !== did) {
+        const prev = document.getElementById(_sigOpenId);
+        if (prev) {
+          prev.classList.remove('open');
+          const pr = logEl.querySelector('[data-drawer="' + _sigOpenId + '"]');
+          if (pr) pr.classList.remove('recap-row-active');
+        }
       }
-      if (isOpen) { drawer.classList.remove('open'); row.classList.remove('recap-row-active'); _pbfwOpenId = null; }
-      else { drawer.classList.add('open'); row.classList.add('recap-row-active'); _pbfwOpenId = did; }
+      if (isOpen) { drawer.classList.remove('open'); row.classList.remove('recap-row-active'); _sigOpenId = null; }
+      else        { drawer.classList.add('open');    row.classList.add('recap-row-active');    _sigOpenId = did; }
     });
   });
 }
+
+// Initial render on page load (shows empty state or any stored sessions)
+renderAnalyzerSection();
 </script>
 </body>
 </html>
