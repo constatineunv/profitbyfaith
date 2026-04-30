@@ -329,6 +329,17 @@
 
 /* Override: trades page dark background assumed */
 #pbf-analyzer-widget-section * { box-sizing: border-box; }
+
+/* ── Stat card font size fixes ── */
+.sc-label {
+  font-size: 0.85rem;
+}
+.sc-sub {
+  font-size: 0.82rem;
+}
+.sc-gauge-val {
+  font-size: 1.8rem;
+}
 </style>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
@@ -367,49 +378,6 @@
   </div>
   <div class="recap-trade-table" id="recap-table"></div>
 </section>
-</div>
-
-<!-- STAT CARDS — This Month -->
-<div class="wrap section-gap">
-  <div class="stat-cards">
-
-    <div class="stat-card">
-      <div class="sc-label">Net P&amp;L</div>
-      <div class="sc-value" id="sc-pnl">—</div>
-      <div class="sc-sub" id="sc-pnl-sub">This month</div>
-    </div>
-
-    <div class="stat-card">
-      <div class="sc-label">Trade Win %</div>
-      <div class="sc-gauge-wrap">
-        <svg class="sc-gauge" viewBox="0 0 120 70" fill="none">
-          <path d="M10,65 A50,50 0 0,1 110,65" stroke="rgba(255,255,255,0.08)" stroke-width="10" stroke-linecap="round"/>
-          <path id="g-trade-arc" d="M10,65 A50,50 0 0,1 10,65" stroke="#2dd4bf" stroke-width="10" stroke-linecap="round"/>
-        </svg>
-        <div class="sc-gauge-val" id="sc-winrate">—%</div>
-      </div>
-      <div class="sc-sub" id="sc-winrate-sub">— W &nbsp;/&nbsp; — L</div>
-    </div>
-
-    <div class="stat-card">
-      <div class="sc-label">Day Win %</div>
-      <div class="sc-gauge-wrap">
-        <svg class="sc-gauge" viewBox="0 0 120 70" fill="none">
-          <path d="M10,65 A50,50 0 0,1 110,65" stroke="rgba(255,255,255,0.08)" stroke-width="10" stroke-linecap="round"/>
-          <path id="g-day-arc" d="M10,65 A50,50 0 0,1 10,65" stroke="#c9a84c" stroke-width="10" stroke-linecap="round"/>
-        </svg>
-        <div class="sc-gauge-val" id="sc-dayrate">—%</div>
-      </div>
-      <div class="sc-sub" id="sc-dayrate-sub">— green &nbsp;/&nbsp; — red</div>
-    </div>
-
-    <div class="stat-card">
-      <div class="sc-label">Avg Win / Avg Loss</div>
-      <div class="sc-value" id="sc-ratio">—</div>
-      <div class="sc-sub" id="sc-ratio-sub">Win/loss ratio</div>
-    </div>
-
-  </div>
 </div>
 
 <!-- PBF SIGNAL ANALYZER WIDGET -->
@@ -623,6 +591,47 @@
       <span class="ms-chip"><span class="ms-val red" id="ms-red">—</span><span class="ms-lbl">Red</span></span>
       <span class="ms-chip"><span class="ms-val gold" id="ms-rate">—%</span><span class="ms-lbl">Win Rate</span></span>
     </div>
+  </div>
+
+  <!-- STAT CARDS — This Month -->
+  <div class="stat-cards">
+
+    <div class="stat-card">
+      <div class="sc-label">Net P&amp;L</div>
+      <div class="sc-value" id="sc-pnl">—</div>
+      <div class="sc-sub" id="sc-pnl-sub">This month</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="sc-label">Trade Win %</div>
+      <div class="sc-gauge-wrap">
+        <svg class="sc-gauge" viewBox="0 0 120 70" fill="none">
+          <path d="M10,65 A50,50 0 0,1 110,65" stroke="rgba(255,255,255,0.08)" stroke-width="10" stroke-linecap="round"/>
+          <path id="g-trade-arc" d="M10,65 A50,50 0 0,1 10,65" stroke="#2dd4bf" stroke-width="10" stroke-linecap="round"/>
+        </svg>
+        <div class="sc-gauge-val" id="sc-winrate">—%</div>
+      </div>
+      <div class="sc-sub" id="sc-winrate-sub">— W &nbsp;/&nbsp; — L</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="sc-label">Day Win %</div>
+      <div class="sc-gauge-wrap">
+        <svg class="sc-gauge" viewBox="0 0 120 70" fill="none">
+          <path d="M10,65 A50,50 0 0,1 110,65" stroke="rgba(255,255,255,0.08)" stroke-width="10" stroke-linecap="round"/>
+          <path id="g-day-arc" d="M10,65 A50,50 0 0,1 10,65" stroke="#c9a84c" stroke-width="10" stroke-linecap="round"/>
+        </svg>
+        <div class="sc-gauge-val" id="sc-dayrate">—%</div>
+      </div>
+      <div class="sc-sub" id="sc-dayrate-sub">— green &nbsp;/&nbsp; — red</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="sc-label">Avg Win / Avg Loss</div>
+      <div class="sc-value" id="sc-ratio">—</div>
+      <div class="sc-sub" id="sc-ratio-sub">Win/loss ratio</div>
+    </div>
+
   </div>
 
   <div class="cal-nav">
