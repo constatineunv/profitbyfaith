@@ -405,6 +405,18 @@
   font-weight: 500; border-top: 1px solid var(--pbf-line);
   background: rgba(7,10,15,0.55);
 }
+.pbf-tc-conflict {
+  display: none;
+  padding: 7px 14px;
+  font-size: 10.5px; color: #ffb84d; font-weight: 700;
+  letter-spacing: 0.6px;
+  border-top: 1px solid rgba(255,140,0,0.25);
+  background: rgba(60,30,0,0.4);
+}
+.pbf-tc-conflict.visible { display: block; }
+.pbf-tc-conflict::before {
+  content: '⚠ '; color: #ff9d40; margin-right: 4px;
+}
 .pbf-tc-verse {
   padding: 7px 14px 8px;
   border-top: 1px solid var(--pbf-line);
@@ -680,6 +692,8 @@ body.pbf-stream-live .pbf-teaser-card {
         <div class="pbf-tc-analysis" id="pbf-analysis">
           ORB breakout confirmed above VAH — EMA 200 bias bullish. POC holding as support. Confluence strong. Watching for first 15M close above ORB High.
         </div>
+
+        <div class="pbf-tc-conflict" id="pbf-conflict"></div>
 
         <div class="pbf-tc-verse">
           <span class="pbf-tc-verse-icon">✝</span>
@@ -1506,6 +1520,17 @@ function applySignal(d) {
   el('pbf-ent').textContent   = fmt(d.entry);
   el('pbf-stp').textContent   = fmt(d.stop);
   if (d.analysis) el('pbf-analysis').textContent = d.analysis;
+
+  // Conflict banner — surface NT8 conflict_note when present
+  const cf = el('pbf-conflict');
+  if (cf) {
+    if (d.conflict === true && d.conflict_note) {
+      cf.textContent = d.conflict_note;
+      cf.classList.add('visible');
+    } else {
+      cf.classList.remove('visible');
+    }
+  }
 
   const connDot = el('pbf-conn-dot');
   if (connDot) {

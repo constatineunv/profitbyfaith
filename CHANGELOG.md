@@ -2,6 +2,35 @@
 
 ---
 
+## [2026-04-30] feat: viewer parity port — trades + homepage match canonical PBFOverlay
+
+**Files changed:** `trades/index.html`, `index.html`
+
+Brought `trades.profitbyfaith.com` and the homepage hero widget into feature parity with `AI Scripts/PBFOverlay.html` (the canonical OBS overlay), keeping per-folder copies as preferred.
+
+**Trades page (`trades/index.html`):**
+- **Signal log de-duplication overhaul** (the headline fix — solves "same entry logged a million times"):
+  - Guard 0: `signal_id` based dedup — NT8 stamps each setup with a stable ID; same ID never logs twice regardless of how many times opp_state oscillates.
+  - Guard 1: existing-row dedup by entry+dir for unscored rows.
+  - Guard 2: 20-second post-resolve cooldown — same level+dir cannot re-fire immediately after a W/L/BE.
+  - Guard 3: price-blown-past-stop guard — if current price is already past stop on append, skip the ghost log entry.
+- Added Entry 3 conditional row + Re-entry "2R avail." row to the levels ladder.
+- `.pbfw-strength-badge.active` gold-gradient style (matches canonical).
+- Signal-flash animation on transitions into ACTIVE state (`@keyframes pbfwFlash`).
+- Poll cadence 2000ms → 1000ms (matches canonical).
+
+**Homepage (`index.html`):**
+- Conflict banner element + CSS — surfaces NT8 `conflict_note` when `d.conflict === true`. Previously silent on conflicts.
+- Light-touch only by design; no ladder/grid/tally — homepage stays a teaser, not a tool.
+
+**NT8 indicator (`AI Scripts/PBFSignalAnalyzer.cs`, same day):**
+- Entry classification per setup: retest/reject → `LIMIT` at level; break/reclaim/lose → `STOP` one tick past. New JSON fields `entry_type`, `entry_limit`, `entry_stop` emitted (display deferred).
+- Structure-aware stop: 5-bar swing lookback + ATR-scaled buffer, capped at `StopTicks` and floored at 40% of `StopTicks`. Target recomputed from entry to preserve `TargetRR`.
+- Trigger discipline: 5-bar global cooldown between any fires; per-setup-id+direction proximity dedupe (≥ `StopTicks` away or 30 bars before re-fire).
+- Defaults: `StopTicks` 12 → 40 (10 NQ pts), `MinFireScore` 40 → 60.
+
+---
+
 ## [2026-04-29] feat: rewrite Signal Consistency to use localStorage signal log
 
 **Files changed:** `trades/index.html`

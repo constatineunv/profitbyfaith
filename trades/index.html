@@ -214,7 +214,15 @@
 }
 .pbfw-strength-badge.strong   { color: var(--pbfw-win2);  border-color: rgba(0,230,118,0.5);  background: rgba(0,40,16,0.45); }
 .pbfw-strength-badge.moderate { color: var(--pbfw-gold2); border-color: rgba(201,168,76,0.5); background: rgba(60,45,0,0.35); }
+.pbfw-strength-badge.active   { color: #fff; border-color: var(--pbfw-gold2); background: linear-gradient(180deg, var(--pbfw-gold), var(--pbfw-goldbr)); }
 .pbfw-strength-badge.weak     { color: #999; }
+
+@keyframes pbfwFlash {
+  0%   { transform: scale(1);    filter: brightness(1); }
+  35%  { transform: scale(1.18); filter: brightness(2); }
+  100% { transform: scale(1);    filter: brightness(1); }
+}
+.pbfw-signal-badge.signal-flash { animation: pbfwFlash 0.55s cubic-bezier(0.2,0.8,0.4,1) forwards; }
 
 .pbfw-c-score { padding: 9px 14px 8px; }
 .pbfw-score-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 5px; }
@@ -499,6 +507,12 @@
         </div>
         <div class="pbfw-lrow row-e2">
           <span class="pbfw-llbl">Entry 2</span><span class="pbfw-lval" id="pbfw-ent2">--</span><span class="pbfw-ltag">backup</span>
+        </div>
+        <div class="pbfw-lrow row-e3" id="pbfw-ent3-row" style="display:none">
+          <span class="pbfw-llbl">Entry 3</span><span class="pbfw-lval" id="pbfw-ent3">--</span><span class="pbfw-ltag">scale</span>
+        </div>
+        <div class="pbfw-lrow row-re" id="pbfw-reentry-row">
+          <span class="pbfw-llbl">Re-entry</span><span class="pbfw-lval" id="pbfw-reentry">--</span><span class="pbfw-ltag" id="pbfw-reentry-tag">2R avail.</span>
         </div>
         <div class="pbfw-lrow div"></div>
         <div class="pbfw-lrow row-tgt">
@@ -1022,11 +1036,18 @@ function pbfwApply(d) {
     if (opp === 'APPROACHING') card.classList.add('approaching');
   }
 
-  // Signal badge
+  // Signal badge — flash on transition into ACTIVE (canonical PBFOverlay pattern)
   const sig = pbfwEl('pbfw-sig');
   if (sig) {
     sig.textContent = dir === 'SELL' ? 'SHORT' : (dir === 'BUY' ? 'LONG' : '--');
     sig.className   = 'pbfw-signal-badge ' + (dir === 'SELL' ? 'short' : dir === 'BUY' ? 'long' : '');
+    if (opp === 'ACTIVE' && pbfwLastOppForLog !== 'ACTIVE') {
+      sig.classList.remove('signal-flash');
+      void sig.offsetWidth;
+      sig.classList.add('signal-flash');
+      sig.addEventListener('animationend',
+        () => sig.classList.remove('signal-flash'), { once: true });
+    }
   }
 
   // Opp state
@@ -1039,7 +1060,13 @@ function pbfwApply(d) {
 
   pbfwEl('pbfw-strat').textContent  = strat || '--';
   const sEl = pbfwEl('pbfw-strength');
-  if (sEl) { sEl.textContent = str; sEl.className='pbfw-strength-badge '+(str==='STRONG'?'strong':str==='MODERATE'?'moderate':'weak'); }
+  if (sEl) {
+    sEl.textContent = str;
+    sEl.className = 'pbfw-strength-badge ' +
+      (str === 'STRONG'   ? 'strong'   :
+       str === 'MODERATE' ? 'moderate' :
+       str === 'ACTIVE'   ? 'active'   : 'weak');
+  }
 
   pbfwEl('pbfw-score').innerHTML = score + ' <span style="color:#555;font-size:10px;">/ 100</span>';
   pbfwEl('pbfw-fill').style.width = score + '%';
@@ -1064,6 +1091,20 @@ function pbfwApply(d) {
   pbfwEl('pbfw-ent1').textContent  = pbfwFmt(d.entry);
   pbfwEl('pbfw-ent2').textContent  = pbfwFmt(d.entry2);
   pbfwEl('pbfw-stp').textContent   = pbfwFmt(d.stop);
+
+  // Entry 3 — conditional row, only shown when present
+  const e3 = pbfwFmt(d.entry3);
+  pbfwEl('pbfw-ent3').textContent = e3;
+  const e3Row = pbfwEl('pbfw-ent3-row');
+  if (e3Row) e3Row.style.display = e3 !== '--' ? 'flex' : 'none';
+
+  // Re-entry — show "2R avail." when present, else "not yet"
+  const hasRe = d.reentry && parseFloat(d.reentry) > 0;
+  pbfwEl('pbfw-reentry').textContent = hasRe ? pbfwFmt(d.reentry) : '--';
+  const reTag = pbfwEl('pbfw-reentry-tag');
+  if (reTag) reTag.textContent = hasRe ? '2R avail.' : 'not yet';
+  const reRow = pbfwEl('pbfw-reentry-row');
+  if (reRow) reRow.classList.toggle('unavailable', !hasRe);
 
   const refs = {
     'rfw-orbh':pbfwFmt(d.orb_high),'rfw-orbl':pbfwFmt(d.orb_low),
@@ -1128,7 +1169,7 @@ function pbfwOffline() {
 }
 
 pbfwPoll();
-setInterval(pbfwPoll, 2000);
+setInterval(pbfwPoll, 1000);
 
 /* ══════════════════════════════════════════
    PBF SIGNAL LOG — localStorage trade tracking
@@ -1142,6 +1183,15 @@ const PBFW_LOG_MAX      = 30;
 let   pbfwLastOppForLog = null;
 let   pbfwLastTallyData = null;
 
+// ── Dedup / cooldown state (mirrors PBFOverlay.html canonical) ─────────
+// Without these, the same NT8 setup that fires repeatedly (or that stays
+// ACTIVE across page reloads) ends up in the log multiple times.
+let   pbfwLastLoggedSignalId  = null;
+let   pbfwLastResolvedEntry   = null;
+let   pbfwLastResolvedDir     = null;
+let   pbfwLastResolvedTime    = 0;
+const PBFW_POST_RESOLVE_COOLDOWN = 20000; // 20s before same level+dir can log again
+
 function pbfwETDateStr() {
   const d = pbfwNowET();
   return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
@@ -1151,13 +1201,45 @@ function pbfwDayLog(ds)    { try { return JSON.parse(localStorage.getItem(pbfwDa
 function pbfwSaveDayLog(log, ds) { try { localStorage.setItem(pbfwDayLogKey(ds), JSON.stringify(log)); } catch(_) {} }
 
 function pbfwAppendSignal(d, dir) {
-  const log = pbfwDayLog();
+  const newEntry = d.entry ? parseFloat(d.entry).toFixed(2) : '--';
+  const log      = pbfwDayLog();
+
+  // ── Guard 0: signal_id ─────────────────────────────────────────────
+  // NT8 stamps each discrete setup with a stable ID. Same ID = same trade
+  // event still live — never log it twice regardless of how many ACTIVE
+  // transitions the indicator emits.
+  if (d.signal_id) {
+    if (d.signal_id === pbfwLastLoggedSignalId) return;
+    pbfwLastLoggedSignalId = d.signal_id;
+  }
+
+  // ── Guard 1: dedup ─────────────────────────────────────────────────
+  // An unscored row with same entry+dir already exists — same opportunity
+  // still open. Don't add a duplicate.
+  if (log.some(r => r.result === '--' && r.entry === newEntry && r.dir === dir)) return;
+
+  // ── Guard 2: post-resolve cooldown ─────────────────────────────────
+  // The same entry+dir just resolved (W/L/BE). Ignore rapid re-fires at
+  // the same level until cooldown expires.
+  if (newEntry === pbfwLastResolvedEntry && dir === pbfwLastResolvedDir
+      && Date.now() - pbfwLastResolvedTime < PBFW_POST_RESOLVE_COOLDOWN) return;
+
+  // ── Guard 3: price already blown past stop ─────────────────────────
+  // If current price is already beyond the stop, the opportunity passed
+  // without a proper entry. Don't log a ghost trade.
+  const curP = parseFloat(d.price);
+  const stp  = parseFloat(d.stop);
+  if (!isNaN(curP) && !isNaN(stp) && stp > 0) {
+    if (dir === 'BUY'  && curP < stp) return;
+    if (dir === 'SELL' && curP > stp) return;
+  }
+
   log.unshift({
     id:     Date.now(),
     time:   new Date().toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit' }),
     dir:    dir,
     strat:  (d.strategy || '--').toUpperCase().replace(/-/g,' '),
-    entry:  d.entry  ? parseFloat(d.entry).toFixed(2)  : '--',
+    entry:  newEntry,
     stop:   d.stop   ? parseFloat(d.stop).toFixed(2)   : '--',
     target: d.target ? parseFloat(d.target).toFixed(2) : '--',
     score:  Math.round(d.score || 0),
@@ -1173,6 +1255,10 @@ function pbfwMarkLogResult(result) {
   const row = log.find(r => r.result === '--');
   if (!row) return;
   row.result = result;
+  // Record what just resolved so pbfwAppendSignal can apply post-resolve cooldown
+  pbfwLastResolvedEntry = row.entry;
+  pbfwLastResolvedDir   = row.dir;
+  pbfwLastResolvedTime  = Date.now();
   pbfwSaveDayLog(log);
   renderAnalyzerSection();
 }
