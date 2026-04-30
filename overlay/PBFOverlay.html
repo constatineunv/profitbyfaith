@@ -1,0 +1,1476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>PBF Trading Analyzer</title>
+<style>
+  /* ════════════════════════════════════════════════════════════════════════
+     PBF Trading Analyzer — Overlay v3
+     Brand: ProfitByFaith · Pray. Trade. Grow.
+     Designed for OBS Browser Source — 440px wide, transparent background.
+     ════════════════════════════════════════════════════════════════════════ */
+  :root {
+    --black:   #070a0f;
+    --navy:    #0d1526;
+    --navy-2:  #131c33;
+    --gold:    #c9a84c;
+    --gold-2:  #e8c84a;
+    --gold-bright: #ffd700;
+    --win:     #2dd4bf;
+    --win-2:   #00e676;
+    --loss:    #f87171;
+    --loss-2:  #ff5252;
+    --warn:    #ffd600;
+    --muted:   #6b7587;
+    --line:    #1e2a48;
+    --line-2:  #2a3960;
+  }
+
+  html, body {
+    margin: 0; padding: 0;
+    background: transparent !important;
+    width: 440px; overflow-x: hidden; overflow-y: auto;
+    font-family: 'DM Sans', 'Segoe UI', Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  * { box-sizing: border-box; }
+
+  /* ─── CARD ──────────────────────────────────────────────────────────── */
+  #card {
+    width: 440px;
+    background: linear-gradient(180deg, rgba(13,21,38,0.96) 0%, rgba(7,10,15,0.97) 100%);
+    border: 2px solid var(--gold);
+    border-radius: 12px;
+    overflow: hidden;
+    color: #fff;
+    font-size: 13px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5), inset 0 1px 0 rgba(212,175,55,0.18);
+    transition: border-color 0.45s ease, box-shadow 0.45s ease;
+  }
+
+  /* ─── HEADER ────────────────────────────────────────────────────────── */
+  #header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 12px 14px;
+    background: rgba(7,10,15,0.92);
+    border-bottom: 1px solid rgba(201,168,76,0.35);
+    position: relative;
+  }
+  #header::after {
+    content: ''; position: absolute; left: 0; right: 0; bottom: 0;
+    height: 2px; background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    opacity: 0.6;
+  }
+
+  #header-left { display: flex; align-items: center; gap: 9px; min-width: 0; }
+  #pbf-logo {
+    height: 42px; width: auto; object-fit: contain;
+    filter: drop-shadow(0 0 4px rgba(201,168,76,0.35));
+  }
+  #brand {
+    font-family: 'Bebas Neue', 'Segoe UI', sans-serif;
+    font-size: 18px; font-weight: 800; color: var(--gold-2);
+    letter-spacing: 1.5px; line-height: 1;
+    text-shadow: 0 0 10px rgba(201,168,76,0.35);
+  }
+  #app-name {
+    font-size: 10px; font-weight: 800;
+    letter-spacing: 2px; text-transform: uppercase;
+    margin-top: 3px;
+  }
+  #app-name .word-signal   { color: #ffffff; }
+  #app-name .word-analyzer { color: var(--gold-2); }
+  #tagline {
+    font-size: 8.5px; color: #8899bb; letter-spacing: 1.2px;
+    text-transform: uppercase; margin-top: 2px;
+  }
+
+  #header-right { text-align: right; min-width: 110px; }
+  #market-pill {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 3px 9px; border-radius: 999px;
+    font-size: 9px; font-weight: 800; letter-spacing: 1.5px;
+    background: rgba(40,44,60,0.7);
+    border: 1px solid var(--line-2);
+    color: #cfd4e0;
+    text-transform: uppercase;
+  }
+  #market-pill .dot {
+    width: 7px; height: 7px; border-radius: 50%; background: #555;
+  }
+  #market-pill.state-open    { color: #b5f0c2; border-color: rgba(0,230,118,0.55); background: rgba(0,40,16,0.55); }
+  #market-pill.state-open    .dot { background: var(--win-2); box-shadow: 0 0 8px var(--win-2); animation: pulse 2.2s infinite; }
+  #market-pill.state-pre     { color: #ffe2a3; border-color: rgba(255,200,80,0.55); background: rgba(60,40,0,0.45); }
+  #market-pill.state-pre     .dot { background: #ffc850; box-shadow: 0 0 6px #ffc850; }
+  #market-pill.state-after   { color: #c5b3ff; border-color: rgba(150,120,255,0.55); background: rgba(28,18,60,0.5); }
+  #market-pill.state-after   .dot { background: #9d7dff; box-shadow: 0 0 6px #9d7dff; }
+  #market-pill.state-closed  { color: #aaa; border-color: #555; background: rgba(50,50,55,0.45); }
+  #market-pill.state-closed  .dot { background: #888; }
+  #market-pill.state-weekend { color: #aaa; border-color: #555; background: rgba(50,50,55,0.45); }
+  #market-pill.state-weekend .dot { background: #888; }
+
+  #clock {
+    font-size: 10px; color: #aaa; font-weight: 600;
+    letter-spacing: 0.5px; margin-top: 3px; font-variant-numeric: tabular-nums;
+  }
+
+  /* ─── PRICE BAR ─────────────────────────────────────────────────────── */
+  #price-bar {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 9px 14px 7px;
+    background: rgba(7,10,15,0.55);
+    border-bottom: 1px solid var(--line);
+  }
+  #price-side { display: flex; flex-direction: column; }
+  #price-label {
+    font-size: 9px; color: #777; font-weight: 700;
+    letter-spacing: 1.5px; text-transform: uppercase;
+  }
+  #current-price {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 34px; font-weight: 800; color: #fff;
+    font-variant-numeric: tabular-nums; line-height: 1.05;
+    transition: color 0.25s ease;
+    margin-top: 2px;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.85);
+  }
+  #current-price.up   { color: var(--win-2); text-shadow: 0 0 14px rgba(0,230,118,0.55), 0 1px 2px rgba(0,0,0,0.9); }
+  #current-price.down { color: var(--loss-2); text-shadow: 0 0 14px rgba(255,82,82,0.55), 0 1px 2px rgba(0,0,0,0.9); }
+
+  #interval-side { text-align: right; }
+  #interval-label {
+    font-size: 9px; color: #777; font-weight: 700;
+    letter-spacing: 1.5px; text-transform: uppercase;
+  }
+  #interval-val {
+    font-size: 19px; font-weight: 800; color: var(--gold-2);
+    font-variant-numeric: tabular-nums; line-height: 1.05; margin-top: 2px;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.85);
+  }
+
+  /* ─── OPPORTUNITY STATUS BANNER ──────────────────────────────────────── */
+  #opp-banner {
+    padding: 11px 14px 8px;
+    text-align: center;
+    border-bottom: 1px solid var(--line);
+    position: relative;
+    transition: background 0.4s ease;
+  }
+  #opp-state {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 14px; font-weight: 700;
+    letter-spacing: 4px; text-transform: uppercase;
+    color: var(--muted); margin-bottom: 5px;
+    transition: color 0.3s ease;
+  }
+  #opp-state .pulse-dot {
+    display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+    background: currentColor; vertical-align: middle; margin-right: 7px;
+    animation: pulse 1.4s infinite;
+  }
+  #opp-state.no-pulse .pulse-dot { animation: none; opacity: 0.7; }
+
+  #signal-row {
+    display: flex; align-items: center; justify-content: center;
+    gap: 12px;
+  }
+  #signal-badge {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 52px; font-weight: 900; letter-spacing: 5px; line-height: 0.95;
+    color: var(--muted);
+    transition: color 0.3s ease, text-shadow 0.3s ease, transform 0.25s ease;
+    text-shadow: 0 2px 3px rgba(0,0,0,0.9);
+  }
+  #signal-badge.dimmed { opacity: 0.45; text-shadow: none !important; }
+
+  #signal-meta { display: flex; flex-direction: column; gap: 4px; }
+  #strategy-badge {
+    font-size: 11px; font-weight: 800; padding: 3px 10px;
+    border-radius: 4px; letter-spacing: 1.5px;
+    background: rgba(13,21,38,0.85);
+    color: var(--gold-2);
+    border: 1px solid var(--gold);
+    text-transform: uppercase;
+  }
+  #strength-badge {
+    font-size: 11px; font-weight: 800; padding: 2px 8px;
+    border-radius: 4px; letter-spacing: 1px;
+    background: rgba(20,28,50,0.7);
+    color: #c0c8d8;
+    border: 1px solid var(--line-2);
+    text-transform: uppercase;
+  }
+  #strength-badge.strong   { color: var(--win-2);  border-color: rgba(0,230,118,0.5);  background: rgba(0,40,16,0.45); }
+  #strength-badge.moderate { color: var(--gold-2); border-color: rgba(201,168,76,0.5); background: rgba(60,45,0,0.35); }
+  #strength-badge.active   { color: #fff; border-color: var(--gold-2); background: linear-gradient(180deg, var(--gold), var(--gold-2)); }
+  #strength-badge.weak     { color: #999; }
+
+  /* ─── SCORE BAR ─────────────────────────────────────────────────────── */
+  #score-section { padding: 9px 14px 8px; }
+  #score-row {
+    display: flex; justify-content: space-between; align-items: baseline;
+    margin-bottom: 5px;
+  }
+  #score-label {
+    font-size: 10px; color: #aaa; font-weight: 700;
+    letter-spacing: 1.5px; text-transform: uppercase;
+  }
+  #score-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 20px; color: var(--gold-2); font-weight: 800;
+    font-variant-numeric: tabular-nums; letter-spacing: 0.5px;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.85);
+  }
+  #score-num .of { color: #666; font-size: 12px; }
+  #score-track {
+    width: 100%; height: 6px;
+    background: rgba(20,28,50,0.85);
+    border-radius: 4px; overflow: hidden;
+    border: 1px solid rgba(20,28,50,1);
+  }
+  #score-fill {
+    height: 100%; border-radius: 4px;
+    background: linear-gradient(90deg, var(--gold), var(--gold-bright));
+    transition: width 0.5s cubic-bezier(0.2, 0.8, 0.4, 1);
+    box-shadow: 0 0 10px rgba(255,215,0,0.4);
+  }
+
+  /* ─── LEVEL LADDER ──────────────────────────────────────────────────── */
+  #levels { padding: 7px 14px 8px; display: flex; flex-direction: column; gap: 1px; }
+  .ladder-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 3px 0;
+  }
+  .ladder-row.ladder-divider {
+    border-top: 1px dashed var(--line); margin: 3px 0; padding: 0;
+  }
+  .ladder-label {
+    font-size: 11px; font-weight: 800; text-transform: uppercase;
+    letter-spacing: 1px; color: #b0a; width: 82px; flex-shrink: 0;
+  }
+  .ladder-value {
+    font-size: 18px; font-weight: 800; font-variant-numeric: tabular-nums;
+    color: #fff; flex: 1; text-align: center; letter-spacing: 0.5px;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.85);
+  }
+  .ladder-tag {
+    font-size: 10px; color: #777; font-style: italic;
+    text-align: right; min-width: 72px; letter-spacing: 0.3px;
+    text-transform: uppercase;
+  }
+  .row-target .ladder-label, .row-target .ladder-value { color: var(--win-2); }
+  .row-target .ladder-tag { color: var(--win-2); opacity: 0.6; }
+  .row-stop   .ladder-label, .row-stop   .ladder-value { color: var(--loss-2); }
+  .row-stop   .ladder-tag { color: var(--loss-2); opacity: 0.7; }
+  .row-stop   .ladder-label { letter-spacing: 2px; }
+  .row-e1 .ladder-label { color: #fff; }
+  .row-e1 .ladder-value { color: #fff; font-size: 21px; text-shadow: 0 0 10px rgba(255,255,255,0.3), 0 1px 2px rgba(0,0,0,0.9); }
+  .row-e2 .ladder-value { color: var(--gold-2); }
+  .row-e3 .ladder-value { color: #c9a84c; }
+  .row-re .ladder-value { color: #aaa; }
+  .row-re.unavailable .ladder-label,
+  .row-re.unavailable .ladder-value,
+  .row-re.unavailable .ladder-tag { color: #383838; }
+
+  /* ─── REFERENCE LEVELS GRID ──────────────────────────────────────────── */
+  #ref-section {
+    padding: 7px 14px 9px;
+    border-top: 1px solid var(--line);
+    background: rgba(7,10,15,0.4);
+  }
+  #ref-title {
+    font-size: 9px; font-weight: 800; color: #777;
+    letter-spacing: 2px; text-transform: uppercase; margin-bottom: 6px;
+  }
+  #ref-grid {
+    display: grid; grid-template-columns: 1fr 1fr 1fr;
+    gap: 3px 10px;
+  }
+  .ref-cell {
+    display: flex; flex-direction: column; gap: 1px;
+  }
+  .ref-cell.full { grid-column: span 3; display: flex; flex-direction: row; justify-content: space-between; padding-top: 2px; }
+  .ref-key {
+    font-size: 9.5px; color: #888; font-weight: 800;
+    letter-spacing: 1px; text-transform: uppercase;
+  }
+  .ref-val {
+    font-size: 13px; color: #e8eef8; font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.85);
+  }
+  .ref-val.dim { color: #444; font-style: italic; }
+  .ref-val.bull { color: var(--win-2); }
+  .ref-val.bear { color: var(--loss-2); }
+
+  /* ─── ANALYSIS ──────────────────────────────────────────────────────── */
+  #analysis-section {
+    padding: 8px 14px;
+    font-size: 13px;
+    color: #e2e7f0;
+    line-height: 1.55;
+    font-weight: 600;
+    border-top: 1px solid var(--line);
+    background: rgba(7,10,15,0.55);
+    min-height: 36px;
+    text-shadow: 0 1px 1px rgba(0,0,0,0.6);
+  }
+
+  /* ─── CONFLICT BANNER ───────────────────────────────────────────────── */
+  #conflict-banner {
+    display: none;
+    background: linear-gradient(180deg, #b80000 0%, #800000 100%);
+    color: #fff;
+    font-size: 12.5px; font-weight: 800;
+    padding: 7px 14px; line-height: 1.4; letter-spacing: 0.3px;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.7);
+    border-top: 1px solid rgba(255,100,100,0.5);
+    border-bottom: 1px solid rgba(255,100,100,0.5);
+  }
+  #conflict-banner.visible { display: block; }
+  #conflict-banner::before {
+    content: '⚠ '; font-size: 12px;
+  }
+
+  /* ─── VERSE ─────────────────────────────────────────────────────────── */
+  #verse-section {
+    padding: 7px 14px 8px;
+    border-top: 1px solid var(--line);
+    display: flex; align-items: flex-start; gap: 8px;
+    background: rgba(7,10,15,0.55);
+  }
+  #verse-icon {
+    font-size: 15px; flex-shrink: 0; margin-top: 1px;
+    color: var(--gold); opacity: 0.85;
+  }
+  #verse-text {
+    font-size: 14px; color: var(--gold-2); font-style: italic;
+    line-height: 1.5; flex: 1; font-weight: 600;
+    opacity: 0; transition: opacity 0.8s ease;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.7);
+  }
+  #verse-text.visible { opacity: 1; }
+  #verse-ref { font-style: normal; font-weight: 700; color: var(--gold-bright); white-space: nowrap; margin-left: 4px; }
+
+  /* ─── FOOTER ────────────────────────────────────────────────────────── */
+  #footer {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 6px 14px;
+    background: rgba(7,10,15,0.92);
+    border-top: 1px solid rgba(201,168,76,0.25);
+    font-size: 9.5px; color: #777;
+    letter-spacing: 0.5px;
+  }
+  #conn-dot {
+    width: 7px; height: 7px; border-radius: 50%; background: #555;
+    display: inline-block; margin-right: 5px; vertical-align: middle;
+  }
+  #conn-dot.live { background: var(--win-2); box-shadow: 0 0 6px var(--win-2); }
+  #conn-dot.wait { background: var(--warn); animation: pulse 1.6s infinite; }
+  #conn-dot.dead { background: var(--loss-2); }
+
+  @keyframes pulse  { 0%,100%{opacity:1;} 50%{opacity:0.25;} }
+  @keyframes flash {
+    0%   { opacity:0.05; transform:scale(1.18);  }
+    40%  { opacity:1;    transform:scale(1.06); }
+    100% { opacity:1;    transform:scale(1);    }
+  }
+  .signal-flash { animation: flash 0.55s cubic-bezier(0.2, 0.8, 0.4, 1) forwards; }
+
+  /* ── DIRECTION & STATE THEMES ─────────────────────────────────────── */
+  body.dir-buy  #signal-badge { color: var(--win-2); }
+  body.dir-sell #signal-badge { color: var(--loss-2); }
+
+  body.opp-active.dir-buy  #signal-badge { text-shadow: 0 0 24px rgba(0,230,118,0.85); }
+  body.opp-active.dir-sell #signal-badge { text-shadow: 0 0 24px rgba(255,82,82,0.85); }
+  body.opp-active.dir-buy  #card { border-color: var(--win-2);  box-shadow: 0 0 28px rgba(0,230,118,0.30), inset 0 1px 0 rgba(0,230,118,0.2); }
+  body.opp-active.dir-sell #card { border-color: var(--loss-2); box-shadow: 0 0 28px rgba(255,82,82,0.30), inset 0 1px 0 rgba(255,82,82,0.2); }
+  body.opp-active.dir-buy  #score-fill { background: linear-gradient(90deg, #004d20, var(--win-2)); }
+  body.opp-active.dir-sell #score-fill { background: linear-gradient(90deg, #7a0000, var(--loss-2)); }
+
+  body.opp-approaching #card { border-color: var(--gold-bright); box-shadow: 0 0 22px rgba(255,215,0,0.35); animation: approachPulse 1.6s infinite; }
+  @keyframes approachPulse {
+    0%,100% { box-shadow: 0 0 22px rgba(255,215,0,0.30); }
+    50%     { box-shadow: 0 0 32px rgba(255,215,0,0.55); }
+  }
+
+  body.opp-hit     #card { border-color: var(--win-2);  box-shadow: 0 0 24px rgba(0,230,118,0.4); }
+  body.opp-stopped #card { border-color: var(--loss-2); box-shadow: 0 0 24px rgba(255,82,82,0.4); }
+
+  body.opp-waiting   #opp-state, body.opp-watching #opp-state { color: var(--gold-2); }
+  body.opp-approaching #opp-state { color: var(--gold-bright); }
+  body.opp-active    #opp-state { color: #fff; }
+  body.opp-hit       #opp-state { color: var(--win-2); }
+  body.opp-stopped   #opp-state { color: var(--loss-2); }
+  body.opp-passed    #opp-state { color: var(--muted); }
+
+  body.market-closed #card,
+  body.market-weekend #card {
+    border-color: #555;
+    box-shadow: 0 0 12px rgba(0,0,0,0.5);
+  }
+
+  /* ─── BELL TOAST ────────────────────────────────────────────────────── */
+  #bell-toast {
+    width: 440px; padding: 12px 14px; margin-bottom: 6px;
+    text-align: center; border-radius: 10px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 14px; font-weight: 800; letter-spacing: 3px; text-transform: uppercase;
+    opacity: 0; display: none;
+    transition: opacity 0.6s ease;
+    backdrop-filter: blur(6px);
+  }
+  #bell-toast.visible { opacity: 1; }
+  #bell-toast.bell-open  {
+    background: rgba(0,40,16,0.85);
+    border: 2px solid var(--win-2);
+    color: var(--win-2);
+    box-shadow: 0 0 24px rgba(0,230,118,0.45);
+  }
+  #bell-toast.bell-close {
+    background: rgba(60,45,0,0.85);
+    border: 2px solid var(--gold);
+    color: var(--gold-2);
+    box-shadow: 0 0 24px rgba(201,168,76,0.45);
+  }
+
+  /* ─── CLOSED OVERLAY ─────────────────────────────────────────────────── */
+  #closed-banner {
+    width: 440px; padding: 16px 14px; margin-bottom: 6px;
+    text-align: center; border-radius: 10px;
+    background: linear-gradient(180deg, rgba(7,10,15,0.92), rgba(13,21,38,0.92));
+    border: 1px solid var(--line-2);
+    color: #aab; display: none;
+  }
+  #closed-banner.visible { display: block; }
+  #closed-banner .label {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px; letter-spacing: 4px;
+    color: var(--gold-2); margin-bottom: 4px;
+  }
+  #closed-banner .sub {
+    font-size: 10.5px; color: #889; font-style: italic;
+    letter-spacing: 0.5px;
+  }
+  #closed-banner .countdown {
+    font-size: 13px; color: #d8e0f0; font-weight: 700;
+    margin-top: 6px; font-variant-numeric: tabular-nums;
+    letter-spacing: 1px;
+  }
+
+  /* ─── TRADE LOG ─────────────────────────────────────────────────────── */
+  #log-card {
+    width: 440px; margin-top: 6px;
+    background: rgba(13,21,38,0.92);
+    border: 1px solid var(--line-2);
+    border-radius: 10px; overflow: hidden;
+    color: #fff; font-size: 12px;
+  }
+  #log-header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 7px 14px;
+    background: rgba(7,10,15,0.92);
+    border-bottom: 1px solid var(--line);
+    cursor: pointer; user-select: none;
+  }
+  #log-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 13px; font-weight: 700; color: #888;
+    letter-spacing: 3px; text-transform: uppercase;
+  }
+  #log-toggle { font-size: 10px; color: #555; }
+  #log-stats {
+    font-size: 10.5px; color: var(--gold-2); font-weight: 700;
+    padding: 6px 14px 3px; letter-spacing: 0.5px;
+  }
+  #log-table { width: 100%; border-collapse: collapse; }
+  #log-table th {
+    font-size: 9px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 1px; color: #555;
+    padding: 4px 14px; text-align: left;
+    border-bottom: 1px solid var(--line);
+  }
+  #log-table td {
+    font-size: 11px; padding: 4px 14px;
+    border-bottom: 1px solid #14141e;
+    font-variant-numeric: tabular-nums;
+  }
+  #log-table tr:last-child td { border-bottom: none; }
+  .td-buy  { color: var(--win-2);  font-weight: 700; }
+  .td-sell { color: var(--loss-2); font-weight: 700; }
+  .td-result { cursor: pointer; font-weight: 800; letter-spacing: 0.5px; min-width: 28px; }
+  .td-result:hover { opacity: 0.65; }
+  .res-w  { color: var(--win-2);  }
+  .res-l  { color: var(--loss-2); }
+  .res-be { color: var(--warn);   }
+  #log-actions { padding: 4px 14px 6px; display: flex; justify-content: flex-end; }
+  #btn-clear {
+    font-size: 9px; font-weight: 700; color: #555;
+    background: none; border: none; cursor: pointer;
+    letter-spacing: 1px; text-transform: uppercase; padding: 2px 0;
+  }
+  #btn-clear:hover { color: var(--loss-2); }
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;700;800&display=swap" rel="stylesheet">
+</head>
+<body class="opp-waiting">
+
+<div id="bell-toast"></div>
+
+<div id="card">
+
+  <!-- Header -->
+  <div id="header">
+    <div id="header-left">
+      <img id="pbf-logo" src="https://profitbyfaith.com/assets/PBF-LOGO-MAIN.jpg" alt="PBF" />
+      <div>
+        <div id="brand">ProfitByFaith</div>
+        <div id="app-name"><span class="word-signal">Signal</span> <span class="word-analyzer">Analyzer</span></div>
+        <div id="tagline">Pray · Trade · Grow</div>
+      </div>
+    </div>
+    <div id="header-right">
+      <span id="market-pill" class="state-closed">
+        <span class="dot"></span><span id="market-text">CLOSED</span>
+      </span>
+      <div id="clock">--:--:-- ET</div>
+    </div>
+  </div>
+
+  <!-- Price + Interval -->
+  <div id="price-bar">
+    <div id="price-side">
+      <div id="price-label">NQ Price</div>
+      <div id="current-price">--</div>
+    </div>
+    <div id="interval-side">
+      <div id="interval-label">Chart</div>
+      <div id="interval-val">--</div>
+    </div>
+  </div>
+
+  <!-- Opportunity State Banner -->
+  <div id="opp-banner">
+    <div id="opp-state"><span class="pulse-dot"></span><span id="opp-state-text">WAITING</span></div>
+    <div id="signal-row">
+      <div id="signal-badge">--</div>
+      <div id="signal-meta">
+        <span id="strategy-badge">--</span>
+        <span id="strength-badge">--</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Score -->
+  <div id="score-section">
+    <div id="score-row">
+      <span id="score-label">Confluence</span>
+      <span id="score-num">0<span class="of"> / 100</span></span>
+    </div>
+    <div id="score-track"><div id="score-fill" style="width:0%"></div></div>
+    <div id="prob-row" style="margin-top:5px;display:flex;justify-content:flex-end;align-items:baseline;gap:6px;">
+      <span style="font-size:10px;color:#888;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;">Win Prob</span>
+      <span id="prob-val" style="font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--gold-2);font-weight:800;font-variant-numeric:tabular-nums;text-shadow:0 1px 2px rgba(0,0,0,0.85);">~--%</span>
+    </div>
+  </div>
+
+  <!-- Level Ladder -->
+  <div id="levels">
+    <div class="ladder-row row-e1">
+      <span class="ladder-label">Entry 1</span>
+      <span class="ladder-value" id="entry-val">--</span>
+      <span class="ladder-tag">primary</span>
+    </div>
+    <div class="ladder-row row-e2">
+      <span class="ladder-label">Entry 2</span>
+      <span class="ladder-value" id="entry2-val">--</span>
+      <span class="ladder-tag">backup</span>
+    </div>
+    <div class="ladder-row row-e3" id="entry3-row" style="display:none">
+      <span class="ladder-label">Entry 3</span>
+      <span class="ladder-value" id="entry3-val">--</span>
+      <span class="ladder-tag">late entry</span>
+    </div>
+    <div class="ladder-row row-re" id="reentry-row">
+      <span class="ladder-label">Re-Entry</span>
+      <span class="ladder-value" id="reentry-val">--</span>
+      <span class="ladder-tag" id="reentry-tag">2R avail.</span>
+    </div>
+    <div class="ladder-row ladder-divider"></div>
+    <div class="ladder-row row-target">
+      <span class="ladder-label">Target</span>
+      <span class="ladder-value" id="target-val">--</span>
+      <span class="ladder-tag">take profit</span>
+    </div>
+    <div class="ladder-row row-stop">
+      <span class="ladder-label">Stop</span>
+      <span class="ladder-value" id="stop-val">--</span>
+      <span class="ladder-tag">invalidation</span>
+    </div>
+  </div>
+
+  <!-- Reference Levels -->
+  <div id="ref-section">
+    <div id="ref-title">Reference Levels</div>
+    <div id="ref-grid">
+      <div class="ref-cell"><span class="ref-key">ORB H</span><span class="ref-val" id="ref-orbh">--</span></div>
+      <div class="ref-cell"><span class="ref-key">VWAP</span><span class="ref-val" id="ref-vwap">--</span></div>
+      <div class="ref-cell"><span class="ref-key">EMA 200</span><span class="ref-val" id="ref-ema">--</span></div>
+      <div class="ref-cell"><span class="ref-key">ORB L</span><span class="ref-val" id="ref-orbl">--</span></div>
+      <div class="ref-cell"><span class="ref-key">POC</span><span class="ref-val" id="ref-poc">--</span></div>
+      <div class="ref-cell"><span class="ref-key">ATR</span><span class="ref-val" id="ref-atr">--</span></div>
+      <div class="ref-cell"><span class="ref-key">VAH</span><span class="ref-val" id="ref-vah">--</span></div>
+      <div class="ref-cell"><span class="ref-key">VAL</span><span class="ref-val" id="ref-val">--</span></div>
+      <div class="ref-cell"><span class="ref-key">IB H/L</span><span class="ref-val" id="ref-ib">--</span></div>
+      <div class="ref-cell"><span class="ref-key">PDH</span><span class="ref-val" id="ref-pdh">--</span></div>
+      <div class="ref-cell"><span class="ref-key">PDC</span><span class="ref-val" id="ref-pdc">--</span></div>
+      <div class="ref-cell"><span class="ref-key">PDL</span><span class="ref-val" id="ref-pdl">--</span></div>
+      <div class="ref-cell"><span class="ref-key">PMH</span><span class="ref-val" id="ref-pmh">--</span></div>
+      <div class="ref-cell"><span class="ref-key">Sess H/L</span><span class="ref-val" id="ref-sess">--</span></div>
+      <div class="ref-cell"><span class="ref-key">PML</span><span class="ref-val" id="ref-pml">--</span></div>
+    </div>
+  </div>
+
+  <!-- Analysis -->
+  <div id="analysis-section">
+    <span id="analysis-text">Connecting to PBF Signal Analyzer...</span>
+  </div>
+
+  <!-- Conflict -->
+  <div id="conflict-banner">
+    <span>Caution: </span><span id="conflict-text"></span>
+  </div>
+
+  <!-- Closed Banner (renders inside card when market is closed) -->
+  <div id="closed-banner">
+    <div class="label" id="closed-label">MARKET CLOSED</div>
+    <div class="sub" id="closed-sub">Pray · Plan · Prepare</div>
+    <div class="countdown" id="closed-countdown"></div>
+  </div>
+
+  <!-- Verse -->
+  <div id="verse-section">
+    <span id="verse-icon">&#10013;</span>
+    <span id="verse-text"></span>
+  </div>
+
+  <!-- Footer -->
+  <div id="footer">
+    <span><span id="conn-dot" class="wait"></span><span id="conn-status">Waiting for server...</span></span>
+    <span id="timestamp-text">--</span>
+  </div>
+
+</div>
+
+<!-- Trade Log -->
+<div id="log-card">
+  <div id="log-header" onclick="toggleLog()">
+    <span id="log-title">Trade Log</span>
+    <span id="log-toggle">&#9650;</span>
+  </div>
+  <div id="log-body">
+    <div id="log-stats">No results logged yet</div>
+    <table id="log-table">
+      <thead>
+        <tr>
+          <th>Time</th>
+          <th>Dir</th>
+          <th>Strat</th>
+          <th>Entry</th>
+          <th>Stop</th>
+          <th>Target</th>
+          <th>Result</th>
+        </tr>
+      </thead>
+      <tbody id="log-tbody"></tbody>
+    </table>
+    <div id="log-actions">
+      <button id="btn-clear" onclick="clearLog()">Clear Log</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const $ = id => document.getElementById(id);
+
+  // ── Element refs ─────────────────────────────────────────────────────────
+  const signalBadge    = $('signal-badge');
+  const oppStateText   = $('opp-state-text');
+  const oppStateRow    = $('opp-state');
+  const strategyBadge  = $('strategy-badge');
+  const strengthBadge  = $('strength-badge');
+  const scoreNum       = $('score-num');
+  const scoreFill      = $('score-fill');
+  const probVal        = $('prob-val');
+  const priceEl        = $('current-price');
+  const intervalEl     = $('interval-val');
+  const entryVal       = $('entry-val');
+  const entry2Val      = $('entry2-val');
+  const entry3Val      = $('entry3-val');
+  const entry3Row      = $('entry3-row');
+  const reentryVal     = $('reentry-val');
+  const reentryRow     = $('reentry-row');
+  const reentryTag     = $('reentry-tag');
+  const targetVal      = $('target-val');
+  const stopVal        = $('stop-val');
+  const analysisText   = $('analysis-text');
+  const conflictBanner = $('conflict-banner');
+  const conflictText   = $('conflict-text');
+  const dot            = $('conn-dot');
+  const connStatus     = $('conn-status');
+  const timestampText  = $('timestamp-text');
+  const verseText      = $('verse-text');
+  const marketPill     = $('market-pill');
+  const marketText     = $('market-text');
+  const clockEl        = $('clock');
+  const closedBanner   = $('closed-banner');
+  const closedLabel    = $('closed-label');
+  const closedSub      = $('closed-sub');
+  const closedCountdown = $('closed-countdown');
+
+  // Reference cells
+  const ref = {
+    orbh: $('ref-orbh'), orbl: $('ref-orbl'),
+    vwap: $('ref-vwap'), ema:  $('ref-ema'),  atr: $('ref-atr'),
+    poc:  $('ref-poc'),  vah:  $('ref-vah'),  val: $('ref-val'),
+    pdh:  $('ref-pdh'),  pdl:  $('ref-pdl'),  pdc: $('ref-pdc'),
+    pmh:  $('ref-pmh'),  pml:  $('ref-pml'),  sess: $('ref-sess'),
+    ib:   $('ref-ib')
+  };
+
+  let lastSignal    = null;
+  let lastDirection = null;
+  let lastOppState  = null;
+  let lastPrice     = null;
+  let audioCtx      = null;
+  let lastLoggedSignalId = null;
+
+  // ── Audio ────────────────────────────────────────────────────────────────
+  function getCtx() {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === 'suspended') audioCtx.resume().catch(() => {});
+    return audioCtx;
+  }
+  try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {}
+  document.addEventListener('click', getCtx, { once: true });
+
+  function tone(ctx, freq, type, t, dur, vol) {
+    const osc = ctx.createOscillator(), g = ctx.createGain();
+    osc.connect(g); g.connect(ctx.destination);
+    osc.type = type; osc.frequency.value = freq;
+    g.gain.setValueAtTime(0, t);
+    g.gain.linearRampToValueAtTime(vol, t + 0.015);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    osc.start(t); osc.stop(t + dur + 0.02);
+  }
+
+  function playBuySound() {
+    try {
+      const ctx = getCtx(), now = ctx.currentTime + 0.04;
+      tone(ctx, 523.25, 'sine',  now,        0.28, 0.30);
+      tone(ctx, 659.25, 'sine',  now + 0.11, 0.28, 0.34);
+      tone(ctx, 783.99, 'sine',  now + 0.22, 0.55, 0.38);
+      tone(ctx, 1318.5, 'sine',  now + 0.28, 0.50, 0.14);
+      tone(ctx, 110,    'sine',  now,        0.18, 0.25);
+    } catch(e) {}
+  }
+
+  function playSellSound() {
+    try {
+      const ctx = getCtx(), now = ctx.currentTime + 0.04;
+      tone(ctx, 880.00, 'square',   now,        0.10, 0.20);
+      tone(ctx, 659.25, 'square',   now + 0.10, 0.10, 0.22);
+      tone(ctx, 440.00, 'sawtooth', now + 0.20, 0.40, 0.26);
+      tone(ctx, 82.41,  'sine',     now + 0.18, 0.40, 0.28);
+    } catch(e) {}
+  }
+
+  function playApproachPing() {
+    try {
+      const ctx = getCtx(), now = ctx.currentTime + 0.04;
+      tone(ctx, 1046.5, 'sine', now,        0.18, 0.18);
+      tone(ctx, 1567.98, 'sine', now + 0.12, 0.20, 0.16);
+    } catch(e) {}
+  }
+
+  function playWinChime() {
+    try {
+      const ctx = getCtx(), now = ctx.currentTime + 0.04;
+      tone(ctx, 783.99, 'sine', now,        0.20, 0.30);
+      tone(ctx, 1046.5, 'sine', now + 0.14, 0.20, 0.32);
+      tone(ctx, 1318.5, 'sine', now + 0.28, 0.55, 0.34);
+    } catch(e) {}
+  }
+
+  function playLossThud() {
+    try {
+      const ctx = getCtx(), now = ctx.currentTime + 0.04;
+      tone(ctx, 220, 'sawtooth', now,       0.45, 0.30);
+      tone(ctx, 110, 'sine',     now,       0.55, 0.35);
+    } catch(e) {}
+  }
+
+  // ── Market Bells ─────────────────────────────────────────────────────────
+  let bellFired    = { open: false, close: false };
+  let bellLastDate = '';
+
+  // NYSE-style hand bell: sharp metallic clang transient + resonant tonal partials.
+  // Partials modelled after a large brass hand bell (hum, prime, tierce, quint, nominal).
+  function strikeNYSEBell(ctx, t, vol) {
+    // ── Metallic clang transient (filtered noise burst) ──────────────────
+    try {
+      const bufLen = Math.floor(ctx.sampleRate * 0.055);
+      const buf    = ctx.createBuffer(1, bufLen, ctx.sampleRate);
+      const data   = buf.getChannelData(0);
+      for (let i = 0; i < bufLen; i++) data[i] = Math.random() * 2 - 1;
+      const noise  = ctx.createBufferSource();
+      noise.buffer = buf;
+      const nf = ctx.createBiquadFilter();
+      nf.type = 'bandpass'; nf.frequency.value = 4200; nf.Q.value = 0.7;
+      const ng = ctx.createGain();
+      noise.connect(nf); nf.connect(ng); ng.connect(ctx.destination);
+      ng.gain.setValueAtTime(0, t);
+      ng.gain.linearRampToValueAtTime(vol * 0.9, t + 0.001);
+      ng.gain.exponentialRampToValueAtTime(0.0001, t + 0.06);
+      noise.start(t); noise.stop(t + 0.08);
+    } catch(_) {}
+
+    // ── Tonal partials — brass hand bell at D5 (587 Hz) ─────────────────
+    // [ freq, decay(s), relative amplitude ]
+    const partials = [
+      [293.7, 4.2, 0.55],   // sub-octave hum — adds weight
+      [587.3, 4.8, 1.00],   // fundamental  D5
+      [880.0, 3.6, 0.60],   // tierce       A5
+      [1174.7, 2.8, 0.48],  // nominal/octave D6
+      [1760.0, 1.8, 0.28],  // quint        A6
+      [2349.3, 1.1, 0.16],  // D7
+      [3520.0, 0.6, 0.08],  // A7 shimmer
+    ];
+    partials.forEach(([freq, decay, amp]) => {
+      const osc = ctx.createOscillator(), g = ctx.createGain();
+      osc.connect(g); g.connect(ctx.destination);
+      osc.type = 'sine'; osc.frequency.value = freq;
+      g.gain.setValueAtTime(0, t);
+      g.gain.linearRampToValueAtTime(vol * amp, t + 0.002);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + decay);
+      osc.start(t); osc.stop(t + decay + 0.05);
+    });
+  }
+
+  // NYSE opening: 8 rapid strikes ~0.68s apart (matches floor footage cadence)
+  function playOpeningBell() {
+    try {
+      const ctx = getCtx(), now = ctx.currentTime + 0.1;
+      [0, 0.68, 1.36, 2.04, 2.72, 3.40, 4.08, 4.76].forEach(d => {
+        strikeNYSEBell(ctx, now + d, 0.52);
+      });
+    } catch(e) {}
+  }
+
+  // NYSE closing: 8 strikes, same bell, same cadence
+  function playClosingBell() {
+    try {
+      const ctx = getCtx(), now = ctx.currentTime + 0.1;
+      [0, 0.68, 1.36, 2.04, 2.72, 3.40, 4.08, 4.76].forEach(d => {
+        strikeNYSEBell(ctx, now + d, 0.52);
+      });
+    } catch(e) {}
+  }
+
+  function showBellToast(type) {
+    const toast = $('bell-toast');
+    toast.className = type === 'open' ? 'bell-open' : 'bell-close';
+    toast.textContent = type === 'open'
+      ? '🔔  OPENING BELL  ·  9:30 AM ET'
+      : '🔔  CLOSING BELL  ·  4:00 PM ET';
+    toast.style.display = 'block';
+    requestAnimationFrame(() => toast.classList.add('visible'));
+    setTimeout(() => {
+      toast.classList.remove('visible');
+      setTimeout(() => { toast.style.display = 'none'; toast.className = ''; }, 700);
+    }, 9000);
+  }
+
+  function checkMarketBells() {
+    const now = nowET();
+    const today = now.toDateString();
+    if (today !== bellLastDate) {
+      bellLastDate    = today;
+      bellFired.open  = false;
+      bellFired.close = false;
+    }
+    const h = now.getHours(), m = now.getMinutes(), s = now.getSeconds();
+    if (h === 9 && m === 30 && s <= 3 && !bellFired.open) {
+      bellFired.open = true;
+      playOpeningBell();
+      showBellToast('open');
+    }
+    if (h === 16 && m === 0 && s <= 3 && !bellFired.close) {
+      bellFired.close = true;
+      playClosingBell();
+      showBellToast('close');
+    }
+  }
+
+  // ── ET Clock + Local Market Detection ────────────────────────────────────
+  function nowET() {
+    return new Date(new Date().toLocaleString('en-US', { timeZone: 'America/New_York' }));
+  }
+
+  function classifyMarketLocal(d) {
+    const dow = d.getDay();
+    if (dow === 0 || dow === 6) return 'WEEKEND';
+    const m = d.getHours() * 60 + d.getMinutes();
+    if (m >= 240 && m < 570)   return 'PRE_MARKET';     // 04:00 – 09:30
+    if (m >= 570 && m <= 960)  return 'OPEN';           // 09:30 – 16:00
+    if (m > 960 && m < 1200)   return 'AFTER_HOURS';    // 16:00 – 20:00
+    return 'CLOSED';
+  }
+
+  function fmtClock(d) {
+    const hh = String(d.getHours()).padStart(2,'0');
+    const mm = String(d.getMinutes()).padStart(2,'0');
+    const ss = String(d.getSeconds()).padStart(2,'0');
+    return hh + ':' + mm + ':' + ss + ' ET';
+  }
+
+  function nextOpenET(d) {
+    // returns Date for next 9:30 AM ET market open
+    const next = new Date(d);
+    next.setHours(9,30,0,0);
+    if (d.getHours() > 9 || (d.getHours() === 9 && d.getMinutes() >= 30)) {
+      next.setDate(next.getDate() + 1);
+    }
+    while (next.getDay() === 0 || next.getDay() === 6) next.setDate(next.getDate() + 1);
+    return next;
+  }
+
+  function fmtCountdown(ms) {
+    if (ms <= 0) return '00:00:00';
+    const s = Math.floor(ms / 1000);
+    const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), ss = s % 60;
+    return String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0') + ':' + String(ss).padStart(2,'0');
+  }
+
+  function updateMarketChrome() {
+    const d = nowET();
+    clockEl.textContent = fmtClock(d);
+
+    const state = classifyMarketLocal(d);
+    setMarketPill(state);
+    document.body.classList.remove('market-open','market-pre','market-after','market-closed','market-weekend');
+    document.body.classList.add('market-' + state.toLowerCase().replace('_',''));
+
+    // Show closed banner inside card when market is fully closed/weekend/after-hours
+    if (state === 'CLOSED' || state === 'WEEKEND' || state === 'AFTER_HOURS') {
+      closedBanner.classList.add('visible');
+      const next = nextOpenET(d);
+      const ms = next - d;
+      if (state === 'WEEKEND') {
+        closedLabel.textContent = 'MARKET CLOSED · WEEKEND';
+        closedSub.textContent = 'Rest in His grace · See you Monday';
+      } else if (state === 'AFTER_HOURS') {
+        closedLabel.textContent = 'AFTER HOURS';
+        closedSub.textContent = 'Session complete · Review · Reflect · Reset';
+      } else {
+        closedLabel.textContent = 'MARKET CLOSED';
+        closedSub.textContent = 'Pray · Plan · Prepare';
+      }
+      closedCountdown.textContent = 'Next open in ' + fmtCountdown(ms);
+    } else {
+      closedBanner.classList.remove('visible');
+    }
+  }
+
+  function setMarketPill(state) {
+    let cls = 'state-closed', text = 'CLOSED';
+    if (state === 'OPEN')             { cls = 'state-open';    text = 'MARKET OPEN'; }
+    else if (state === 'PRE_MARKET')  { cls = 'state-pre';     text = 'PRE-MARKET'; }
+    else if (state === 'AFTER_HOURS') { cls = 'state-after';   text = 'AFTER HOURS'; }
+    else if (state === 'WEEKEND')     { cls = 'state-weekend'; text = 'WEEKEND'; }
+    marketPill.className = cls;
+    marketText.textContent = text;
+  }
+
+  // ── Verses ──────────────────────────────────────────────────────────────
+  const VERSES = [
+    { text: "Commit to the Lord whatever you do, and he will establish your plans.", ref: "Prov 16:3" },
+    { text: "The plans of the diligent lead to profit as surely as haste leads to poverty.", ref: "Prov 21:5" },
+    { text: "I can do all things through Christ who strengthens me.", ref: "Phil 4:13" },
+    { text: "Trust in the Lord with all your heart and lean not on your own understanding.", ref: "Prov 3:5" },
+    { text: "For I know the plans I have for you — plans to prosper you and not to harm you.", ref: "Jer 29:11" },
+    { text: "Be strong and courageous. Do not be afraid; do not be discouraged.", ref: "Josh 1:9" },
+    { text: "Whatever you do, work at it with all your heart, as working for the Lord.", ref: "Col 3:23" },
+    { text: "Seek first his kingdom and his righteousness, and all these things will be given to you.", ref: "Matt 6:33" },
+    { text: "In all things God works for the good of those who love him.", ref: "Rom 8:28" },
+    { text: "Whoever gathers money little by little makes it grow.", ref: "Prov 13:11" },
+    { text: "No discipline seems pleasant at the time, but painful. Later on, it produces a harvest of righteousness.", ref: "Heb 12:11" },
+    { text: "A good man leaves an inheritance to his children's children.", ref: "Prov 13:22" },
+    { text: "Do not be anxious about anything, but in every situation present your requests to God.", ref: "Phil 4:6" },
+    { text: "Be still, and know that I am God.", ref: "Ps 46:10" },
+    { text: "Patience is better than pride.", ref: "Eccl 7:8" }
+  ];
+  let vi = Math.floor(Math.random() * VERSES.length);
+  function showVerse(v) {
+    verseText.classList.remove('visible');
+    setTimeout(() => {
+      verseText.innerHTML = '"' + v.text + '" <span id="verse-ref">' + v.ref + '</span>';
+      verseText.classList.add('visible');
+    }, 400);
+  }
+  showVerse(VERSES[vi]);
+  setInterval(() => { vi = (vi + 1) % VERSES.length; showVerse(VERSES[vi]); }, 12000);
+
+  // ── Helpers ──────────────────────────────────────────────────────────────
+  function fmt(v) {
+    const n = parseFloat(v);
+    return (!v || isNaN(n) || n === 0) ? '--' : n.toFixed(2);
+  }
+  function fmtPair(a, b) {
+    const x = fmt(a), y = fmt(b);
+    if (x === '--' && y === '--') return '--';
+    return x + ' · ' + y;
+  }
+  function fmtTime(iso) {
+    try { return new Date(iso).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit'}); }
+    catch(_) { return iso || '--'; }
+  }
+  function fmtSign(v) {
+    const n = parseFloat(v);
+    if (!v || isNaN(n) || n === 0) return '--';
+    return n.toFixed(2);
+  }
+
+  // ── Main update ──────────────────────────────────────────────────────────
+  function updateOverlay(data) {
+    const sig       = (data.signal || 'WAIT').toUpperCase();
+    const dir       = (data.direction || '').toUpperCase() || lastDirection || 'BUY';
+    const oppState  = (data.opp_state || 'WAITING').toUpperCase();
+    const marketSt  = (data.market_state || 'CLOSED').toUpperCase();
+
+    const wasActive = lastOppState === 'ACTIVE';
+    const isActive  = oppState === 'ACTIVE';
+
+    // ── Sound triggers ─────────────────────────────────────────────────
+    if (oppState !== lastOppState) {
+      if (oppState === 'APPROACHING') playApproachPing();
+      else if (oppState === 'ACTIVE') {
+        if (dir === 'BUY')  playBuySound();
+        if (dir === 'SELL') playSellSound();
+        logSignal(data, dir);
+      }
+      else if (oppState === 'HIT')     { playWinChime(); markLastUnscored('W'); }
+      else if (oppState === 'STOPPED') { playLossThud(); markLastUnscored('L'); }
+    }
+
+    // Refresh log header tally even when no new row was added
+    renderLog(data && data.tally);
+
+    lastSignal    = sig;
+    lastDirection = dir;
+    lastOppState  = oppState;
+
+    // ── Body classes (drive theme via CSS) ─────────────────────────────
+    document.body.className = '';
+    document.body.classList.add('opp-' + oppState.toLowerCase());
+    if (dir) document.body.classList.add('dir-' + dir.toLowerCase());
+    document.body.classList.add('market-' + marketSt.toLowerCase().replace('_',''));
+
+    // ── Opportunity state row ──────────────────────────────────────────
+    const stateLabel = {
+      'WAITING':     'WAITING FOR ORB',
+      'WATCHING':    'WATCHING FOR BREAK',
+      'APPROACHING': 'APPROACHING LEVEL',
+      'ACTIVE':      'TRADE ACTIVE',
+      'HIT':         'TARGET HIT',
+      'STOPPED':     'STOPPED OUT',
+      'PASSED':      'OPPORTUNITY PASSED'
+    }[oppState] || oppState;
+    oppStateText.textContent = stateLabel;
+    oppStateRow.classList.toggle('no-pulse',
+      oppState === 'WAITING' || oppState === 'HIT' || oppState === 'STOPPED' || oppState === 'PASSED');
+
+    // ── Signal badge (always show direction) ──────────────────────────
+    signalBadge.textContent = dir;
+    signalBadge.classList.toggle('dimmed', !(isActive || oppState === 'APPROACHING'));
+
+    if (isActive && !wasActive) {
+      signalBadge.classList.remove('signal-flash');
+      void signalBadge.offsetWidth;
+      signalBadge.classList.add('signal-flash');
+      signalBadge.addEventListener('animationend',
+        () => signalBadge.classList.remove('signal-flash'), { once: true });
+    }
+
+    // ── Strategy + strength ────────────────────────────────────────────
+    const STRAT_LABELS = {
+      'ORB-BREAK':    'ORB BREAK',
+      'ORB-LIVE':     'ORB LIVE',
+      'ORB-WATCH':    'ORB WATCH',
+      'VAH-BREAK':    'VAH BREAK',
+      'VAH-REJECT':   'VAH REJECT',
+      'VAH-RETEST':   'VAH RETEST',
+      'VAL-BREAK':    'VAL BREAK',
+      'VAL-REJECT':   'VAL REJECT',
+      'VAL-RETEST':   'VAL RETEST',
+      'POC-RETEST':   'POC RETEST',
+      'POC-REJECT':   'POC REJECT',
+      'POC-BREAK':    'POC BREAK',
+      'VWAP-RECLAIM': 'VWAP RECLAIM',
+      'VWAP-LOSE':    'VWAP LOSE',
+      'IB-BREAK':     'IB BREAK',
+      'PDH-BREAK':    'PDH BREAK',
+      'PDH-RETEST':   'PDH RETEST',
+      'PDL-BREAK':    'PDL BREAK',
+      'PDL-RETEST':   'PDL RETEST',
+      'WATCH':        'SCOUTING',
+      'HIT':          'TARGET HIT',
+      'STOP':         'STOPPED'
+    };
+    const stratRaw = (data.strategy || '--').toUpperCase();
+    const stratKey = stratRaw.endsWith('-LIVE')
+      ? stratRaw.slice(0, -5)
+      : stratRaw;
+    strategyBadge.textContent = STRAT_LABELS[stratKey]
+      || STRAT_LABELS[stratRaw]
+      || stratRaw.replace(/-/g, ' ');
+    const strRaw = (data.strength || '--').toUpperCase();
+    strengthBadge.textContent = strRaw;
+    strengthBadge.className = '';
+    strengthBadge.id = 'strength-badge';
+    if (strRaw === 'STRONG')   strengthBadge.classList.add('strong');
+    else if (strRaw === 'MODERATE') strengthBadge.classList.add('moderate');
+    else if (strRaw === 'ACTIVE')   strengthBadge.classList.add('active');
+    else strengthBadge.classList.add('weak');
+
+    // ── Score ──────────────────────────────────────────────────────────
+    const score = Math.max(0, Math.min(100, data.score || 0));
+    scoreNum.innerHTML = score + '<span class="of"> / 100</span>';
+    scoreFill.style.width = score + '%';
+
+    // ── Win probability ────────────────────────────────────────────────
+    let probPct = (data.prob != null) ? parseInt(data.prob, 10) : Math.round(score * 0.72 + 8);
+    if (isNaN(probPct)) probPct = 0;
+    probPct = Math.max(0, Math.min(99, probPct));
+    probVal.textContent = '~' + probPct + '%';
+
+    // ── Price ──────────────────────────────────────────────────────────
+    const rawP = data.price != null ? data.price : data.currentPrice != null ? data.currentPrice : data.close;
+    if (rawP != null) {
+      const p = parseFloat(rawP);
+      if (!isNaN(p)) {
+        priceEl.textContent = p.toFixed(2);
+        priceEl.className   = lastPrice == null ? '' : p > lastPrice ? 'up' : p < lastPrice ? 'down' : '';
+        lastPrice = p;
+      }
+    } else {
+      priceEl.textContent = '--';
+      priceEl.className   = '';
+    }
+
+    // ── Interval ───────────────────────────────────────────────────────
+    intervalEl.textContent = (data.interval || '--');
+
+    // ── Ladder ─────────────────────────────────────────────────────────
+    entryVal.textContent  = fmt(data.entry);
+    entry2Val.textContent = fmt(data.entry2);
+
+    const e3 = fmt(data.entry3);
+    entry3Val.textContent   = e3;
+    entry3Row.style.display = e3 !== '--' ? 'flex' : 'none';
+
+    targetVal.textContent = fmt(data.target);
+    stopVal.textContent   = fmt(data.stop);
+
+    const hasRe = data.reentry && parseFloat(data.reentry) > 0;
+    reentryVal.textContent = hasRe ? fmt(data.reentry) : '--';
+    reentryRow.classList.toggle('unavailable', !hasRe);
+    reentryTag.textContent = hasRe ? '2R avail.' : 'not yet';
+
+    // ── Reference levels ───────────────────────────────────────────────
+    ref.orbh.textContent = fmt(data.orb_high);
+    ref.orbl.textContent = fmt(data.orb_low);
+    ref.vwap.textContent = fmt(data.vwap);
+
+    ref.ema.textContent  = fmt(data.ema200);
+    ref.ema.className    = 'ref-val';
+    if (data.ema_bull === true)  ref.ema.classList.add('bull');
+    if (data.ema_bull === false) ref.ema.classList.add('bear');
+
+    ref.atr.textContent  = fmt(data.atr);
+    ref.poc.textContent  = fmt(data.poc);
+    ref.vah.textContent  = fmt(data.vah);
+    ref.val.textContent  = fmt(data.val);
+    ref.pdh.textContent  = fmt(data.pdh);
+    ref.pdl.textContent  = fmt(data.pdl);
+    ref.pdc.textContent  = fmt(data.pdc);
+    ref.pmh.textContent  = fmt(data.pmh);
+    ref.pml.textContent  = fmt(data.pml);
+    ref.sess.textContent = fmtPair(data.session_high, data.session_low);
+    ref.ib.textContent   = fmtPair(data.ib_high, data.ib_low);
+
+    // ── Analysis ──────────────────────────────────────────────────────
+    analysisText.textContent = data.analysis || '';
+
+    // ── Conflict ──────────────────────────────────────────────────────
+    if (data.conflict === true && data.conflict_note) {
+      conflictBanner.classList.add('visible');
+      conflictText.textContent = data.conflict_note;
+    } else {
+      conflictBanner.classList.remove('visible');
+    }
+
+    // ── Footer ────────────────────────────────────────────────────────
+    dot.className             = 'live';
+    dot.id                    = 'conn-dot';
+    connStatus.textContent    = 'Live · NT8';
+    timestampText.textContent = fmtTime(data.timestamp);
+  }
+
+  // ── Offline ─────────────────────────────────────────────────────────────
+  function showWaiting(reason) {
+    document.body.className = 'opp-waiting';
+    if (lastDirection) document.body.classList.add('dir-' + lastDirection.toLowerCase());
+
+    // Re-apply market state to retain colored chrome
+    const localState = classifyMarketLocal(nowET());
+    document.body.classList.add('market-' + localState.toLowerCase().replace('_',''));
+
+    signalBadge.textContent  = lastDirection || '--';
+    signalBadge.classList.add('dimmed');
+    oppStateText.textContent = 'OFFLINE';
+    oppStateRow.classList.add('no-pulse');
+
+    strategyBadge.textContent  = '--';
+    strengthBadge.textContent  = '--';
+    strengthBadge.className = ''; strengthBadge.id = 'strength-badge';
+    strengthBadge.classList.add('weak');
+
+    scoreNum.innerHTML       = '0<span class="of"> / 100</span>';
+    scoreFill.style.width    = '0%';
+    priceEl.textContent      = '--';
+    priceEl.className        = '';
+    intervalEl.textContent   = '--';
+    entryVal.textContent     = '--';
+    entry2Val.textContent    = '--';
+    entry3Val.textContent    = '--';
+    entry3Row.style.display  = 'none';
+    reentryVal.textContent   = '--';
+    reentryRow.classList.add('unavailable');
+    reentryTag.textContent   = 'not yet';
+    targetVal.textContent    = '--';
+    stopVal.textContent      = '--';
+
+    Object.values(ref).forEach(el => { el.textContent = '--'; el.className = 'ref-val dim'; });
+
+    analysisText.textContent  = reason || 'Waiting for signal...';
+    conflictBanner.classList.remove('visible');
+    dot.className             = 'dead'; dot.id = 'conn-dot';
+    connStatus.textContent    = 'Server offline';
+    timestampText.textContent = '--';
+  }
+
+  // ── Poll ────────────────────────────────────────────────────────────────
+  const SIGNAL_URL = 'http://localhost:8080/signal';
+
+  async function poll() {
+    checkMarketBells();
+    updateMarketChrome();
+    try {
+      const res = await fetch(SIGNAL_URL, {
+        cache:  'no-store',
+        signal: AbortSignal.timeout ? AbortSignal.timeout(3000) : undefined
+      });
+      if (!res.ok) { showWaiting('Server error ' + res.status); return; }
+      updateOverlay(await res.json());
+    } catch(_) {
+      showWaiting('Connecting to NinjaTrader...');
+    }
+  }
+
+  poll();
+  setInterval(poll, 2000);
+  // Update clock + closed-banner countdown every second
+  setInterval(updateMarketChrome, 1000);
+
+  // ── Trade Log (session-keyed by ET date) ────────────────────────────────
+  const LOG_KEY_PREFIX = 'pbf_trade_log_';
+  const MAX_ROWS = 20;
+  const RESULT_CYCLE = ['--', 'W', 'L', 'BE'];
+
+  function etDateKey() {
+    const d = nowET();
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return y + '-' + m + '-' + day;
+  }
+  function currentLogKey() { return LOG_KEY_PREFIX + etDateKey(); }
+
+  // Migrate any legacy unkeyed log into today's bucket once
+  (function migrateLegacy() {
+    try {
+      const legacy = localStorage.getItem('pbf_trade_log');
+      if (legacy) {
+        const today = currentLogKey();
+        if (!localStorage.getItem(today)) localStorage.setItem(today, legacy);
+        localStorage.removeItem('pbf_trade_log');
+      }
+    } catch(_) {}
+  })();
+
+  function loadLog() {
+    try { return JSON.parse(localStorage.getItem(currentLogKey()) || '[]'); } catch(_) { return []; }
+  }
+  function saveLog(log) { localStorage.setItem(currentLogKey(), JSON.stringify(log)); }
+
+  function markLastUnscored(result) {
+    const log = loadLog();
+    const row = log.find(r => r.result === '--');
+    if (!row) return;
+    row.result = result;
+    // Record what just resolved so logSignal can apply a cooldown
+    lastResolvedEntry = row.entry;
+    lastResolvedDir   = row.dir;
+    lastResolvedTime  = Date.now();
+    saveLog(log);
+    renderLog();
+  }
+
+  function logSignal(data, dir) {
+    const newEntry = fmt(data.entry);
+    const log      = loadLog();
+
+    // ── Guard 0: signal_id ───────────────────────────────────────────────
+    // NT8 stamps each discrete setup with a stable ID. Same ID = same trade
+    // event still live — never log it twice regardless of how many ACTIVE
+    // transitions the indicator emits.
+    if (data.signal_id) {
+      if (data.signal_id === lastLoggedSignalId) return;
+      lastLoggedSignalId = data.signal_id;
+    }
+
+    // ── Guard 1: dedup ───────────────────────────────────────────────────
+    // An unscored row with the same entry+dir already exists — this is the
+    // same opportunity still open, not a new one. Don't add a duplicate.
+    if (log.some(r => r.result === '--' && r.entry === newEntry && r.dir === dir)) return;
+
+    // ── Guard 2: post-resolve cooldown ───────────────────────────────────
+    // The same entry+dir just resolved (W/L/BE). If NT8 immediately fires
+    // ACTIVE again at the same level (rapid oscillation), ignore it until
+    // the cooldown expires. Price needs to move meaningfully away and return
+    // before this level is treated as a fresh opportunity.
+    if (newEntry === lastResolvedEntry && dir === lastResolvedDir
+        && Date.now() - lastResolvedTime < POST_RESOLVE_COOLDOWN) return;
+
+    // ── Guard 3: price already blown past stop ───────────────────────────
+    // If current price is already beyond the stop level, the opportunity
+    // passed without a proper entry. Don't log a ghost trade.
+    const curP = parseFloat(data.price ?? data.currentPrice ?? data.close);
+    const stp  = parseFloat(data.stop);
+    if (!isNaN(curP) && !isNaN(stp) && stp > 0) {
+      if (dir === 'BUY'  && curP < stp) return; // price fell below stop — blown
+      if (dir === 'SELL' && curP > stp) return; // price rose above stop — blown
+    }
+
+    log.unshift({
+      id:     Date.now(),
+      time:   new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+      dir:    dir,
+      strat:  (data.strategy || '--').toUpperCase().replace('-',' '),
+      entry:  newEntry,
+      stop:   fmt(data.stop),
+      target: fmt(data.target),
+      result: '--'
+    });
+    if (log.length > MAX_ROWS) log.length = MAX_ROWS;
+    saveLog(log);
+    renderLog();
+  }
+
+  function cycleResult(id) {
+    const log = loadLog();
+    const row = log.find(r => r.id === id);
+    if (!row) return;
+    row.result = RESULT_CYCLE[(RESULT_CYCLE.indexOf(row.result) + 1) % RESULT_CYCLE.length];
+    saveLog(log);
+    renderLog();
+  }
+
+  function clearLog() { saveLog([]); lastLoggedSignalId = null; renderLog(); }
+
+  function toggleLog() {
+    const body = $('log-body');
+    const icon = $('log-toggle');
+    const hidden = body.style.display === 'none';
+    body.style.display = hidden ? '' : 'none';
+    icon.innerHTML = hidden ? '&#9650;' : '&#9660;';
+  }
+
+  // ── Dedup / cooldown state ───────────────────────────────────────────────
+  // Prevents the same entry level logging repeatedly when NT8 oscillates
+  // ACTIVE→HIT→ACTIVE or when price stalls at a level.
+  let lastResolvedEntry = null;
+  let lastResolvedDir   = null;
+  let lastResolvedTime  = 0;
+  const POST_RESOLVE_COOLDOWN = 20000; // 20s before same level+dir can log again
+
+  let lastTally = null;
+  function renderLog(tally) {
+    if (tally) lastTally = tally;
+    const log    = loadLog();
+    const tbody  = $('log-tbody');
+    const statsEl = $('log-stats');
+
+    const scored = log.filter(r => r.result !== '--');
+    const wins   = scored.filter(r => r.result === 'W').length;
+    const losses = scored.filter(r => r.result === 'L').length;
+    const be     = scored.filter(r => r.result === 'BE').length;
+
+    let manualLine;
+    if (scored.length) {
+      const decisive = wins + losses;
+      const pct = decisive ? Math.round(wins / decisive * 100) : 0;
+      manualLine = 'Manual: ' + wins + 'W  ' + losses + 'L  ' + be + 'BE  ·  ' + pct + '%';
+    } else {
+      manualLine = 'Manual: no results yet — click Result to mark';
+    }
+
+    let liveLine = '';
+    if (lastTally) {
+      const w  = lastTally.wins     || 0;
+      const l  = lastTally.losses   || 0;
+      const b  = lastTally.be       || 0;
+      const sg = lastTally.signals  || 0;
+      const wr = lastTally.win_rate != null ? lastTally.win_rate : 0;
+      liveLine = 'Live (NT8): ' + sg + ' sig · ' + w + 'W ' + l + 'L ' + b + 'BE · ' + wr + '%';
+    }
+    statsEl.innerHTML = (liveLine ? '<div>' + liveLine + '</div>' : '') +
+                        '<div style="color:#aaa;margin-top:2px">' + manualLine + '</div>';
+
+    if (!log.length) {
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#383838;padding:10px 0;font-style:italic">No signals detected yet</td></tr>';
+      return;
+    }
+    tbody.innerHTML = '';
+    log.forEach(row => {
+      const tr = document.createElement('tr');
+      const rc = row.result === 'W' ? 'res-w' : row.result === 'L' ? 'res-l' : row.result === 'BE' ? 'res-be' : '';
+      tr.innerHTML =
+        '<td>' + row.time   + '</td>' +
+        '<td class="' + (row.dir === 'BUY' ? 'td-buy' : 'td-sell') + '">' + row.dir + '</td>' +
+        '<td>' + row.strat  + '</td>' +
+        '<td>' + row.entry  + '</td>' +
+        '<td>' + row.stop   + '</td>' +
+        '<td>' + row.target + '</td>' +
+        '<td class="td-result ' + rc + '" onclick="cycleResult(' + row.id + ')" title="Click to set result">' + row.result + '</td>';
+      tbody.appendChild(tr);
+    });
+  }
+
+  renderLog();
+  updateMarketChrome();
+</script>
+</body>
+</html>

@@ -2,6 +2,26 @@
 
 ---
 
+## [2026-04-30] feat: mirror PBFOverlay.html into repo + 4K stream typography pass
+
+**Files changed:** `overlay/PBFOverlay.html` (new — mirrored from `AI Scripts/PBFOverlay.html`)
+
+Mirrored the canonical OBS overlay into the website repo at `overlay/PBFOverlay.html` so it has version history and a deploy URL. Source of truth is still `AI Scripts/PBFOverlay.html` for OBS local loading; the repo copy is updated when stream styling changes.
+
+**4K stream typography pass (applied to canonical + mirror):**
+- `#current-price` 28→34px / 700→800, black drop-shadow for compression survival
+- `#signal-badge` 44→52px, letter-spacing 4→5px, heavier shadow
+- `#interval-val` 16→19px; `#score-num` 16→20px / 700→800; `#prob-val` 14→18px
+- `.ladder-value` 15→18px / `.row-e1 .ladder-value` 17→21px (entry pops harder)
+- `.ref-val` 11.5→13px / 700→800 (reference grid VWAP/POC/PDH legible from across the room)
+- `#analysis-section` 11.5→13px / 500→600
+- `#conflict-banner` 11→12.5px; `#verse-text` 13→14px / +weight
+- All numerics get a subtle 0 1px 2px rgba(0,0,0,.85) shadow so YouTube's encoder doesn't muddy digits
+
+**Note:** Overlay polls `http://localhost:8080/signal` — only works on the streaming PC running the NinjaTrader indicator. Hosted URL is for version reference, not public consumption.
+
+---
+
 ## [2026-04-30] feat: viewer parity port — trades + homepage match canonical PBFOverlay
 
 **Files changed:** `trades/index.html`, `index.html`
