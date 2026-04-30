@@ -561,13 +561,13 @@ body.pbf-stream-live .pbf-teaser-card {
 
       <div class="pbf-hero-eyebrow" id="pbf-eyebrow">
         <span class="dot-pulse"></span>
-        <span id="pbf-eyebrow-text">PBF Trade Analyzer</span>
+        <span id="pbf-eyebrow-text">Signal Analyzer</span>
       </div>
 
       <h2 class="pbf-hero-title">See It<br><span>In Action</span></h2>
 
       <p class="pbf-hero-sub">
-        Every morning Ryan trades <strong>NQ Futures live</strong> — and the PBF Analyzer is running in real-time.
+        Every morning Mr. Bullionaire trades <strong>NQ Futures live</strong> — and the Signal Analyzer is running in real-time.
         Watch the signals, see the levels, follow the faith.
         <br><br>
         <strong>Confluence-scored setups. No guessing.</strong>
@@ -588,7 +588,7 @@ body.pbf-stream-live .pbf-teaser-card {
         <div class="pbf-live-banner" id="pbf-live-banner">
           <span class="pbf-live-dot"></span>
           <div>
-            <div class="pbf-live-banner-text">Ryan is live right now — analyzer is active</div>
+            <div class="pbf-live-banner-text">Mr. Bullionaire is live right now — analyzer is active</div>
             <a class="pbf-live-banner-link" href="https://www.youtube.com/@bullionaireDT" target="_blank">
               Join the stream on YouTube →
             </a>
@@ -692,7 +692,7 @@ body.pbf-stream-live .pbf-teaser-card {
       <div class="pbf-widget-overlay" id="pbf-overlay">
         <div class="pbf-overlay-icon">⚡</div>
         <div class="pbf-overlay-title">See It Live</div>
-        <div class="pbf-overlay-sub">The analyzer activates when Ryan goes live. Join us every weekday morning.</div>
+        <div class="pbf-overlay-sub">The Signal Analyzer activates when Mr. Bullionaire goes live. Join us every weekday morning.</div>
         <div class="pbf-overlay-time">Live M–F · 9:30 AM ET</div>
       </div>
 
@@ -1388,7 +1388,7 @@ function setLiveMode(live) {
   if (live) {
     document.body.classList.add('pbf-stream-live');
     eyebrow.classList.add('is-live');
-    eyebrowTx.textContent = '🔴 Ryan is Live Now';
+    eyebrowTx.textContent = '🔴 Mr. Bullionaire is Live Now';
     teaser.classList.add('revealed');
     overlay.classList.add('hidden');
     banner.classList.add('visible');
@@ -1397,7 +1397,7 @@ function setLiveMode(live) {
   } else {
     document.body.classList.remove('pbf-stream-live');
     eyebrow.classList.remove('is-live');
-    eyebrowTx.textContent = 'PBF Trade Analyzer';
+    eyebrowTx.textContent = 'Signal Analyzer';
     teaser.classList.remove('revealed');
     overlay.classList.remove('hidden');
     banner.classList.remove('visible');
